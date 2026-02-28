@@ -12,19 +12,20 @@ import java.util.UUID;
 @Table(name = "forgot_passwords")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ForgotPassword {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "email", nullable = false)
+    @Column(nullable = false)
     String email;
 
-    @Column(name = "otp", nullable = false)
+    @Column(nullable = false)
     String otp;
 
     @Column(name = "expire_at", nullable = false)

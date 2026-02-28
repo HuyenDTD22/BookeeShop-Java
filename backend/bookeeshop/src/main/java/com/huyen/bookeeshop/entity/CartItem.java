@@ -9,16 +9,17 @@ import java.util.UUID;
 @Table(name = "cart_items")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "quantity", nullable = false)
+    @Column(nullable = false)
     Integer quantity;
 
     @ManyToOne

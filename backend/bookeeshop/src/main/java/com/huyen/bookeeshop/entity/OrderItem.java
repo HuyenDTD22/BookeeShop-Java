@@ -9,25 +9,26 @@ import java.util.UUID;
 @Table(name = "order_items")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     String title;
 
-    @Column(name = "price", nullable = false)
+    @Column(nullable = false)
     Double price;
 
     @Column(name = "discount_percentage")
     Double discountPercentage;
 
-    @Column(name = "quantity", nullable = false)
+    @Column(nullable = false)
     Integer quantity;
 
     @ManyToOne

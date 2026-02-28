@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -14,37 +15,41 @@ import java.util.UUID;
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "fullName", nullable = false)
+    @Column(name = "full_name")
     String fullName;
 
-    @Column(name = "username", unique = true)
+    @Column(nullable = false, unique = true)
     String username;
 
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     String password;
 
     String gender;
 
-    @Column(name = "phone", unique = true)
+    @Column(unique = true)
     String phone;
 
+    LocalDate dob;
+
     String address;
+
     String avatar;
 
-    @Column(name = "deleted", nullable = false)
-    Boolean deleted;
+    @Column(nullable = false)
+    Boolean deleted = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @ManyToMany

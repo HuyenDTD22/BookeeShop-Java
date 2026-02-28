@@ -13,29 +13,30 @@ import java.util.UUID;
 @Table(name = "categories")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     String name;
 
-    @Column(name = "description", nullable = false)
+    @Column(nullable = false)
     String description;
 
-    @Column(name = "thumbnail", nullable = false)
+    @Column(nullable = false)
     String thumbnail;
 
-    @Column(name = "deleted", nullable = false)
-    Boolean deleted;
+    @Column(nullable = false)
+    Boolean deleted = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @Column(name = "deleted_at")

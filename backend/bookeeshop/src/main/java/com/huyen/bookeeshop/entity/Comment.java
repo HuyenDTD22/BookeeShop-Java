@@ -13,26 +13,25 @@ import java.util.UUID;
 @Table(name = "comments")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "content")
     String content;
 
-    @Column(name = "thumbnail")
     String thumbnail;
 
-    @Column(name = "deleted", nullable = false)
-    Boolean deleted;
+    @Column(nullable = false)
+    Boolean deleted = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @ManyToOne

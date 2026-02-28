@@ -13,68 +13,72 @@ import java.util.UUID;
 @Table(name = "books")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     String title;
 
-    @Column(name = "thumbnail", nullable = false)
+    @Column(nullable = false)
     String thumbnail;
 
-    @Column(name = "description", nullable = false)
+    @Column(nullable = false)
     String description;
 
-    @Column(name = "price", nullable = false)
+    @Column(nullable = false)
     Double price;
 
     @Column(name = "discount_percentage")
     Double discountPercentage;
 
-    @Column(name = "stock", nullable = false)
+    @Column(nullable = false)
     Integer stock;
 
-    @Column(name = "author", nullable = false)
+    @Column(nullable = false)
     String author;
 
-    @Column(name = "supplier", nullable = false)
+    @Column(nullable = false)
     String supplier;
 
-    @Column(name = "publisher", nullable = false)
+    @Column(nullable = false)
     String publisher;
 
-    @Column(name = "publish_year", nullable = false)
+    @Column(nullable = false)
     Integer publishYear;
 
-    @Column(name = "language", nullable = false)
+    @Column(nullable = false)
     String language;
 
-    @Column(name = "size", nullable = false)
+    @Column(nullable = false)
     String size;
 
-    @Column(name = "weight", nullable = false)
+    @Column(nullable = false)
     Double weight;
 
     @Column(name = "page_count", nullable = false)
     Integer pageCount;
 
-    @Column(name = "status", nullable = false)
+    @Column(nullable = false)
     String status;
 
-    @Column(name = "feature", nullable = false)
+    @Column(nullable = false)
     Boolean feature;
 
-    @Column(name = "position", nullable = false)
+    @Column(nullable = false)
     Integer position;
 
+    @Column(nullable = false)
+    Boolean deleted = false;
+
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @Column(name = "deleted_at")
@@ -95,5 +99,6 @@ public class Book {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     Category category;
+
 
 }

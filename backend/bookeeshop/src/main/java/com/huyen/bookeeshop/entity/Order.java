@@ -13,22 +13,23 @@ import java.util.UUID;
 @Table(name = "orders")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     UUID id;
 
-    @Column(name = "fullName", nullable = false)
+    @Column(name = "full_name", nullable = false)
     String fullName;
 
-    @Column(name = "phone", nullable = false)
+    @Column(nullable = false)
     String phone;
 
-    @Column(name = "address", nullable = false)
+    @Column(nullable = false)
     String address;
 
     @Column(name = "payment_status", nullable = false)
@@ -40,11 +41,11 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     Double totalAmount;
 
-    @Column(name = "deleted", nullable = false)
-    Boolean deleted;
+    @Column(nullable = false, updatable = false)
+    Boolean deleted = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @Column(name = "deleted_at")
