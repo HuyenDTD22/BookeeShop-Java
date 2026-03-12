@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/users")
@@ -28,7 +29,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     ApiResponse<UserResponse> registerCustomer(@RequestBody @Valid CustomerCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
-                .message("Tạo tài khoản thành công!")
+                .message("Create user success!")
                 .result(userService.registerCustomer(request))
                 .build();
     }
@@ -40,11 +41,12 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping("/me")
-    ApiResponse<UserResponse> updateUser(@RequestBody @Valid CustomerUpdateRequest request) {
+    @PutMapping(value = "/me", consumes = "application/json")
+    ApiResponse<UserResponse> updateMyProfile(@RequestPart("data") @Valid CustomerUpdateRequest request,
+                                              @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
         return ApiResponse.<UserResponse>builder()
-                .message("Chỉnh sửa thông tin thành công ")
-                .result(userService.updateMyProfile(request))
+                .message("Update information success!")
+                .result(userService.updateMyProfile(request, avatar))
                 .build();
     }
 }

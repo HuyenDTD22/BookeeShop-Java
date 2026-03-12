@@ -1,22 +1,21 @@
 package com.huyen.bookeeshop.dto.request;
 
-import java.time.LocalDate;
-
 import com.huyen.bookeeshop.validator.DobConstraint;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+import java.util.Set;
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CustomerUpdateRequest {
-    @Size(min = 3, max = 50, message = "USERNAME_INVALID")
-    String username;
-
+public class StaffUpdateRequest {
     @Size(min = 8, max = 100, message = "PASSWORD_INVALID")
     String password;
 
@@ -32,4 +31,6 @@ public class CustomerUpdateRequest {
     String phone;
 
     String address;
+
+    Set<UUID> roles;
 }

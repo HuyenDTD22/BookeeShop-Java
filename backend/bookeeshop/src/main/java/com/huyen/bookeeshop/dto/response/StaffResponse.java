@@ -3,7 +3,6 @@ package com.huyen.bookeeshop.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,14 +11,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
+public class StaffResponse {
     UUID id;
-    String username;
     String fullName;
-    LocalDate dob;
-    String gender;
-    String phone;
-    String address;
-    String avatar;
     Set<RoleResponse> roles;
 }
