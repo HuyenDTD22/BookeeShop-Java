@@ -1,17 +1,17 @@
 package com.huyen.bookeeshop.constant;
 
-import java.util.List;
+import lombok.Getter;
 
-public class PredefinedRole {
-    public static final String USER_ROLE = "USER";
-    public static final String ADMIN_ROLE = "ADMIN";
+@Getter
+public enum PredefinedRole {
+    USER_ROLE("USER", "Khách hàng"),
+    ADMIN_ROLE("ADMIN", "Quản trị viên");
 
-    private PredefinedRole() {}
+    private final String name;
+    private final String displayName;
 
-    public static List<String> getAllRoles() {
-        return List.of(
-                USER_ROLE,
-                ADMIN_ROLE
-        );
+    PredefinedRole(String name, String displayName) {
+        this.name = name;
+        this.displayName = displayName;
     }
 }

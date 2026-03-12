@@ -61,15 +61,16 @@ public class InitService {
 
     // 2. Sync Roles
     private void syncRoles() {
-        for(String roleName : PredefinedRole.getAllRoles()) {
-            if(!roleRepository.existsByName(roleName)) {
+        for(PredefinedRole predefinedRole : PredefinedRole.values()) {
+            if(!roleRepository.existsByName(predefinedRole.getName())) {
                 Role role = Role.builder()
-                        .name(roleName)
+                        .name(predefinedRole.getName())
+                        .displayName(predefinedRole.getDisplayName())
                         .deleted(false)
                         .build();
 
                 roleRepository.save(role);
-                log.info("Inserted role: {}", roleName);
+                log.info("Inserted role: {}", predefinedRole.getName());
             }
         }
     }
@@ -82,7 +83,7 @@ public class InitService {
             String roleName = entry.getKey();
             List<String> permissionNames = entry.getValue();
 
-            Role role = roleRepository.findByName(roleName)
+            Role role = roleRepository.findByNameAndDeletedFalse(roleName)
                     .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
             Set<Permission> permissions = permissionNames.stream()
@@ -102,10 +103,10 @@ public class InitService {
         String username = defaultAdminProperties.getUsername();
         String password = defaultAdminProperties.getPassword();
 
-        Role adminRole = roleRepository.findByName(PredefinedRole.ADMIN_ROLE)
+        Role adminRole = roleRepository.findByNameAndDeletedFalse(PredefinedRole.ADMIN_ROLE.getName())
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
-        if (userRepository.findByUsername(username).isEmpty()) {
+        if (userRepository.findByUsernameAndDeletedFalse(username).isEmpty()) {
             User user = User.builder()
                     .username(username)
                     .password(passwordEncoder.encode(password))
