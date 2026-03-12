@@ -66,13 +66,7 @@ public class Book {
     Integer pageCount;
 
     @Column(nullable = false)
-    String status;
-
-    @Column(nullable = false)
     Boolean feature;
-
-    @Column(nullable = false)
-    Integer position;
 
     @Column(nullable = false)
     Boolean deleted = false;
