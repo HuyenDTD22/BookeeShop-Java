@@ -25,6 +25,9 @@ public class Role {
 
     @Column(unique = true, nullable = false)
     String name;
+    
+    @Column(name = "display_name", unique = true, nullable = false)
+    String displayName;
 
     @Column(nullable = false)
     Boolean deleted = false;
