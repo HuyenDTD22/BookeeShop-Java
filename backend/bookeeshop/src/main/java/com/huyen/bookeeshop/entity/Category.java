@@ -45,7 +45,7 @@ public class Category {
     @OneToMany(mappedBy = "category")
     List<Book> books;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     Category parent;
 
