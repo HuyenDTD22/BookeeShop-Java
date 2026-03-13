@@ -29,6 +29,7 @@ public class Role {
     @Column(name = "display_name", unique = true, nullable = false)
     String displayName;
 
+    @Builder.Default
     @Column(nullable = false)
     Boolean deleted = false;
 

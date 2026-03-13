@@ -32,6 +32,7 @@ public class Notification {
     @Column(nullable = false)
     String status;
 
+    @Builder.Default
     @Column(nullable = false)
     Boolean deleted = false;
 

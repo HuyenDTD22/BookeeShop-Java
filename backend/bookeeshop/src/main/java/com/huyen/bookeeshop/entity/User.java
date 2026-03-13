@@ -45,6 +45,7 @@ public class User {
 
     String avatar;
 
+    @Builder.Default
     @Column(nullable = false)
     Boolean deleted = false;
 

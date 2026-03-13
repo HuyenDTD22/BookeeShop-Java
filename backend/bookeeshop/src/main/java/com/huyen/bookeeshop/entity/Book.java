@@ -68,6 +68,7 @@ public class Book {
     @Column(nullable = false)
     Boolean feature;
 
+    @Builder.Default
     @Column(nullable = false)
     Boolean deleted = false;
 

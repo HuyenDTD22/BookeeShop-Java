@@ -27,6 +27,7 @@ public class Comment {
 
     String thumbnail;
 
+    @Builder.Default
     @Column(nullable = false)
     Boolean deleted = false;
 

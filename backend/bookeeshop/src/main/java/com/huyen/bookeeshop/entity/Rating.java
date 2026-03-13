@@ -25,6 +25,7 @@ public class Rating {
     @Column(nullable = false)
     Double value;
 
+    @Builder.Default
     @Column(nullable = false)
     Boolean deleted = false;
 

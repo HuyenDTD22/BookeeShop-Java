@@ -32,6 +32,7 @@ public class Category {
     @Column(nullable = false)
     String thumbnail;
 
+    @Builder.Default
     @Column(nullable = false)
     Boolean deleted = false;
 
