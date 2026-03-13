@@ -1,5 +1,8 @@
 package com.huyen.bookeeshop.entity;
 
+import com.huyen.bookeeshop.enums.OrderStatus;
+import com.huyen.bookeeshop.enums.PaymentMethod;
+import com.huyen.bookeeshop.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -32,15 +35,25 @@ public class Order {
     @Column(nullable = false)
     String address;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
-    String paymentStatus;
+    PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)
-    String paymentMethod;
+    PaymentMethod paymentMethod = PaymentMethod.COD;
 
     @Column(name = "total_amount", nullable = false)
     Double totalAmount;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    OrderStatus status = OrderStatus.PENDING;
+
+    @Builder.Default
     @Column(nullable = false, updatable = false)
     Boolean deleted = false;
 
