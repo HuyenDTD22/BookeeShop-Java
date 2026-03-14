@@ -1,5 +1,6 @@
 package com.huyen.bookeeshop.controller.client;
 
+import com.huyen.bookeeshop.dto.request.ChangePasswordRequest;
 import com.huyen.bookeeshop.dto.request.CustomerCreationRequest;
 import com.huyen.bookeeshop.dto.request.CustomerUpdateRequest;
 import com.huyen.bookeeshop.dto.response.ApiResponse;
@@ -34,19 +35,27 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("/myInfo")
+    @GetMapping("/me")
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
                 .build();
     }
 
-    @PutMapping(value = "/me", consumes = "application/json")
+    @PutMapping(value = "/me", consumes = "multipart/form-data")
     ApiResponse<UserResponse> updateMyProfile(@RequestPart("data") @Valid CustomerUpdateRequest request,
                                               @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
         return ApiResponse.<UserResponse>builder()
                 .message("Update information success!")
                 .result(userService.updateMyProfile(request, avatar))
+                .build();
+    }
+
+    @PatchMapping("/me/password")
+    ApiResponse<String> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        userService.changePassword(request);
+        return ApiResponse.<String>builder()
+                .message("Password changed successfully")
                 .build();
     }
 }
