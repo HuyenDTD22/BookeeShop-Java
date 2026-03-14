@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,8 @@ public class RoleService {
     RoleRepository roleRepository;
     RoleMapper roleMapper;
 
+    // 1. ADMIN - Tạo mới 1 role
+    @Transactional
     public RoleResponse create(RoleCreationRequest request) {
         var role = roleMapper.toRole(request);
 
@@ -37,6 +40,8 @@ public class RoleService {
         return roleMapper.toRoleResponse(role);
     }
 
+    // 2. ADMIN - Cập nhật thông tin role
+    @Transactional
     public RoleResponse update(UUID roleId, RoleUpdateRequest request)  {
         var role = roleRepository.findByIdAndDeletedFalse(roleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
@@ -46,6 +51,8 @@ public class RoleService {
         return roleMapper.toRoleResponse(roleRepository.save(role));
     }
 
+    // 3. ADMIN - Lấy thông tin tất cả role
+    @Transactional(readOnly = true)
     public List<RoleResponse> getAll() {
         try {
             return roleRepository.findAllByDeletedFalse()
@@ -58,6 +65,8 @@ public class RoleService {
         }
     }
 
+    // 4. ADMIN - Xóa role (soft delete)
+    @Transactional
     public void delete(UUID roleId) {
         Role role = roleRepository.findByIdAndDeletedFalse(roleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
