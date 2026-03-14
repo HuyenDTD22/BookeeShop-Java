@@ -36,25 +36,11 @@ public class OrderService {
     OrderRepository orderRepository;
     OrderMapper orderMapper;
 
-    // Các trạng thái đơn hàng không được phép chỉnh sửa thông tin đơn hàng nữa
-    private static final Set<OrderStatus> IMMUTABLE_STATUSES = Set.of(
-            OrderStatus.SHIPPING,
-            OrderStatus.CANCELLED,
-            OrderStatus.COMPLETED
-    );
+    //==========================================================================
+    // ADMIN APIs
+    //==========================================================================
 
-    // Quy tắc chuyển trạng thái đơn hàng hợp lệ: PENDING -> CONFIRMED -> DELIVERED -> COMPLETED
-    // Bất kỳ trạng thái nào cũng có thể chuyển sang CANCELLED trừ COMPLETED
-    private boolean isValidTransition(OrderStatus current, OrderStatus next) {
-        return switch (current) {
-            case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
-            case CONFIRMED -> next == OrderStatus.SHIPPING || next == OrderStatus.CANCELLED;
-            case SHIPPING -> next == OrderStatus.COMPLETED || next == OrderStatus.CANCELLED;
-            case CANCELLED, COMPLETED -> false;
-        };
-    }
-
-    // 1. Lấy tất cả orders (lọc, sắp xếp, phân trang)
+    // 1. ADMIN - Lấy tất cả orders (lọc, sắp xếp, phân trang)
     @Transactional(readOnly = true)
     public Page<OrderResponse> getAll(OrderFilterRequest filter) {
         Sort sort = "oldest".equalsIgnoreCase(filter.getSortBy())
@@ -69,7 +55,7 @@ public class OrderService {
                 .map(orderMapper::toOrderResponse);
     }
 
-    // 2. Lấy chi tiết order theo ID
+    // 2. ADMIN - Lấy chi tiết order theo ID
     @Transactional(readOnly = true)
     public OrderResponse getById(UUID orderId) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -78,7 +64,7 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    // 3. Cập nhật trạng thái đơn hàng
+    // 3. ADMIN - Cập nhật trạng thái đơn hàng
     @Transactional
     public OrderResponse updateOrderStatus(UUID orderId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -108,7 +94,7 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    // 4. Cập nhật trạng thái của nhiều đơn hàng
+    // 4. ADMIN - Cập nhật trạng thái của nhiều đơn hàng
     @Transactional
     public void bulkUpdateOrderStatus(BulkOrderStatusUpdateRequest request) {
         List<UUID> ids = request.getOrderIds();
@@ -133,7 +119,7 @@ public class OrderService {
 
     }
 
-    // 5. Chỉnh sửa thông tin 1 order
+    // 5. ADMIN - Chỉnh sửa thông tin 1 order
     @Transactional
     public OrderResponse update(UUID orderId, OrderUpdateRequest request) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -155,7 +141,7 @@ public class OrderService {
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    // 6. Xoá 1 order
+    // 6. ADMIN - Xoá 1 order
     @Transactional
     public void delete(UUID orderId) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -171,5 +157,27 @@ public class OrderService {
 
         orderRepository.save(order);
     }
+
+    // Các trạng thái đơn hàng không được phép chỉnh sửa thông tin đơn hàng nữa
+    private static final Set<OrderStatus> IMMUTABLE_STATUSES = Set.of(
+            OrderStatus.SHIPPING,
+            OrderStatus.CANCELLED,
+            OrderStatus.COMPLETED
+    );
+
+    // Quy tắc chuyển trạng thái đơn hàng hợp lệ: PENDING -> CONFIRMED -> DELIVERED -> COMPLETED
+    // Bất kỳ trạng thái nào cũng có thể chuyển sang CANCELLED trừ COMPLETED
+    private boolean isValidTransition(OrderStatus current, OrderStatus next) {
+        return switch (current) {
+            case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
+            case CONFIRMED -> next == OrderStatus.SHIPPING || next == OrderStatus.CANCELLED;
+            case SHIPPING -> next == OrderStatus.COMPLETED || next == OrderStatus.CANCELLED;
+            case CANCELLED, COMPLETED -> false;
+        };
+    }
+
+    //==========================================================================
+    // CLIENT APIs
+    //==========================================================================
 
 }
