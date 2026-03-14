@@ -14,8 +14,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomerUpdateRequest {
-    @Size(min = 3, max = 50, message = "USERNAME_INVALID")
-    String username;
 
     @Size(min = 8, max = 100, message = "PASSWORD_INVALID")
     String password;

@@ -3,6 +3,8 @@ package com.huyen.bookeeshop.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,6 +15,14 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffResponse {
     UUID id;
+    String username;
     String fullName;
+    String gender;
+    String phone;
+    String address;
+    String avatar;
+    LocalDate dob;
+    Boolean locked;
+    LocalDateTime createdAt;
     Set<RoleResponse> roles;
 }

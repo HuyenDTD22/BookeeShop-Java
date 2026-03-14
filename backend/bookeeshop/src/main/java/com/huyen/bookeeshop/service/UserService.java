@@ -1,15 +1,11 @@
 package com.huyen.bookeeshop.service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.huyen.bookeeshop.constant.PredefinedRole;
-import com.huyen.bookeeshop.dto.request.CustomerCreationRequest;
-import com.huyen.bookeeshop.dto.request.CustomerUpdateRequest;
-import com.huyen.bookeeshop.dto.request.StaffCreationRequest;
-import com.huyen.bookeeshop.dto.request.StaffUpdateRequest;
+import com.huyen.bookeeshop.dto.request.*;
 import com.huyen.bookeeshop.dto.response.CustomerResponse;
 import com.huyen.bookeeshop.dto.response.StaffResponse;
 import com.huyen.bookeeshop.dto.response.UserResponse;
@@ -20,7 +16,13 @@ import com.huyen.bookeeshop.exception.ErrorCode;
 import com.huyen.bookeeshop.mapper.UserMapper;
 import com.huyen.bookeeshop.repository.RoleRepository;
 import com.huyen.bookeeshop.repository.UserRepository;
+import com.huyen.bookeeshop.specification.UserSpecification;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,175 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     CloudinaryService cloudinaryService;
 
+    //==========================================================================
+    // ADMIN APIs
+    //==========================================================================
+
+    // 1. ADMIN - Tạo tài khoản nhân viên
+    @Transactional
+    public UserResponse createStaff(StaffCreationRequest request, MultipartFile avatar) {
+        User user = userMapper.toStaff(request);
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        Set<Role> roles = resolveStaffRoles(request.getRoles());
+
+        user.setRoles(roles);
+
+        if(avatar != null && !avatar.isEmpty()){
+            String avatarUrl = cloudinaryService.uploadFile(avatar);
+            user.setAvatar(avatarUrl);
+        }
+
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+        return userMapper.toUserResponse(user);
+    }
+
+    // 2. ADMIN - Cập nhật thông tin nhân viên
+    @Transactional
+    public UserResponse updateStaff(UUID userId, StaffUpdateRequest request, MultipartFile avatar) {
+        User user = userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        userMapper.updateStaff(user, request);
+
+        if(request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        if(request.getRoles() != null && !request.getRoles().isEmpty()) {
+            Set<Role> roles = resolveStaffRoles(request.getRoles());
+            user.setRoles(roles);
+        }
+
+        if(avatar != null && !avatar.isEmpty()){
+            String avatarUrl = cloudinaryService.uploadFile(avatar);
+            user.setAvatar(avatarUrl);
+        }
+
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    // 3. ADMIN - Xem danh sách nhân viên
+    @Transactional(readOnly = true)
+    public Page<StaffResponse> getStaffs(StaffFilterRequest filter) {
+        Specification<User> spec = UserSpecification.staffWithFilter(filter);
+
+        Pageable pageable = buildPageable(filter.getPage(), filter.getSize(),
+                filter.getSortBy(), filter.getSortDir());
+
+        return userRepository.findAll(spec, pageable)
+                .map(userMapper::toStaffResponse);
+    }
+
+    // 4. ADMIN - Xem danh sách khách hàng
+    @Transactional(readOnly = true)
+    public Page<CustomerResponse> getCustomers(CustomerFilterRequest filter) {
+        Specification<User> spec = UserSpecification.customerWithFilter(filter);
+
+        Pageable pageable = buildPageable(filter.getPage(), filter.getSize(),
+                filter.getSortBy(), filter.getSortDir());
+
+        return userRepository.findAll(spec, pageable)
+                .map(userMapper::toCustomerResponse);
+    }
+
+    // 5. ADMIN - Xem chi tiết nhân viên hoặc khách hàng
+    @Transactional(readOnly = true)
+    public UserResponse getUser(UUID userId) {
+        return userMapper.toUserResponse(
+                userRepository.findByIdAndDeletedFalse(userId)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
+    }
+
+    // 6. ADMIN - Xóa tài khoản nhân viên hoặc khách hàng (soft delete)
+    public void deleteUser(UUID userId) {
+        User userCurrent = userRepository.findByUsernameAndDeletedFalse(getCurrentUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if(userCurrent.getId().equals(userId)) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_YOURSELF);
+        }
+
+        User user = userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        user.setDeleted(true);
+        user.setDeletedAt(LocalDateTime.now());
+
+        userRepository.save(user);
+    }
+
+    // 7. ADMIN - Khóa/Mở khóa tài khoản nhân viên hoặc khách hàng
+    @Transactional
+    public UserResponse toggleLock(UUID userId) {
+        User currentUser = userRepository.findByUsernameAndDeletedFalse(getCurrentUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (currentUser.getId().equals(userId)) {
+            throw new AppException(ErrorCode.CANNOT_LOCK_YOURSELF);
+        }
+
+        User user = userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        user.setLocked(!user.getLocked());
+
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+
+    private String getCurrentUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    private Set<Role> resolveStaffRoles(Set<UUID> roleIds) {
+        Set<Role> roles = roleRepository.findAllByIdInAndDeletedFalse(roleIds);
+
+        if (roles.size() != roleIds.size()) {
+            throw new AppException(ErrorCode.ROLE_NOT_FOUND);
+        }
+
+        // Không cho phép gán role ADMIN_ROLE cho nhân viên
+        boolean hasAdminRole = roles.stream()
+                .anyMatch(role -> PredefinedRole.ADMIN_ROLE.getName().equals(role.getName()));
+
+        if (hasAdminRole) {
+            throw new AppException(ErrorCode.INVALID_ROLE_ASSIGNMENT);
+        }
+
+        // Chỉ cho phép gán role có prefix STAFF_
+        boolean hasNonStaffRole = roles.stream()
+                .anyMatch(role -> !role.getName().startsWith("STAFF_"));
+
+        if (hasNonStaffRole) {
+            throw new AppException(ErrorCode.INVALID_ROLE_ASSIGNMENT);
+        }
+
+        return roles;
+    }
+
+    private Pageable buildPageable(int page, int size, String sortBy, String sortDir) {
+        int p = Math.max(page, 0);
+        int s = (size > 0 && size <= 100) ? size : 20;
+
+        String sortField = "fullName".equals(sortBy) ? "fullName" : "createdAt";
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir)
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        return PageRequest.of(p, s, Sort.by(direction, sortField));
+    }
+
+    //==========================================================================
+    // CLIENT APIs
+    //==========================================================================
+
+    // 1. CLIENT - Khách hàng đăng ký tài khoản
     @Transactional
     public UserResponse registerCustomer(CustomerCreationRequest request) {
         User user = userMapper.toCustomer(request);
@@ -61,26 +232,19 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    // 2. CLIENT - Xem thông tin cá nhân
+    @Transactional(readOnly = true)
     public UserResponse getMyInfo() {
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
-        User user = userRepository.findByUsernameAndDeletedFalse(username)
+        User user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return userMapper.toUserResponse(user);
     }
 
+    // 3. CLIENT - Cập nhật thông tin cá nhân
     @Transactional
     public UserResponse updateMyProfile(CustomerUpdateRequest request, MultipartFile avatar) {
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
-        User user = userRepository.findByUsernameAndDeletedFalse(username)
+        User user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.updateCustomer(user, request);
@@ -97,111 +261,17 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    // 4. CLIENT - Đổi mật khẩu
     @Transactional
-    public UserResponse createStaff(StaffCreationRequest request, MultipartFile avatar) {
-        User user = userMapper.toStaff(request);
-
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        Set<Role> roles = roleRepository.findAllByIdInAndDeletedFalse(request.getRoles());
-
-        if(roles.size() != request.getRoles().size()) {
-            throw new AppException(ErrorCode.ROLE_NOT_FOUND);
-        }
-
-        boolean hasAdminRole = roles.stream()
-                        .anyMatch(role -> role.getName().equals(PredefinedRole.ADMIN_ROLE.getName()));
-
-        if(hasAdminRole) {
-            throw new AppException(ErrorCode.INVALID_ROLE_ASSIGNMENT);
-        }
-
-        user.setRoles(roles);
-
-        if(avatar != null && !avatar.isEmpty()){
-            String avatarUrl = cloudinaryService.uploadFile(avatar);
-            user.setAvatar(avatarUrl);
-        }
-
-        try {
-            user = userRepository.save(user);
-        } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
-
-        return userMapper.toUserResponse(user);
-    }
-
-    @Transactional
-    public UserResponse updateStaff(UUID userId, StaffUpdateRequest request, MultipartFile avatar) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+    public void changePassword(ChangePasswordRequest request) {
+        User user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        userMapper.updateStaff(user, request);
-
-        if(request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_OLD_PASSWORD);
         }
 
-        if(request.getRoles() != null && !request.getRoles().isEmpty()) {
-            Set<Role> roles = roleRepository.findAllByIdInAndDeletedFalse(request.getRoles()).stream()
-                            .filter(role -> !role.getName().equals(PredefinedRole.ADMIN_ROLE.getName()))
-                            .collect(Collectors.toSet());
-
-            if(roles.isEmpty()) {
-                throw new AppException(ErrorCode.ROLE_NOT_FOUND);
-            }
-
-            user.setRoles(roles);
-        }
-
-        if(avatar != null && !avatar.isEmpty()){
-            String avatarUrl = cloudinaryService.uploadFile(avatar);
-            user.setAvatar(avatarUrl);
-        }
-
-        return userMapper.toUserResponse(userRepository.save(user));
-    }
-
-    public List<StaffResponse> getStaffs() {
-        try {
-            return userRepository.findAllByDeletedFalse().stream()
-                    .filter(user -> user.getRoles() != null && user.getRoles()
-                            .stream()
-                            .map(Role::getName)
-                            .anyMatch(roleName -> roleName != null && roleName.startsWith("STAFF_")))
-                    .map(userMapper::toStaffResponse)
-                    .toList();
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
-    }
-
-    public List<CustomerResponse> getCustomers() {
-        try {
-            return userRepository.findAllByDeletedFalse().stream()
-                    .filter(user -> user.getRoles() != null && user.getRoles()
-                            .stream()
-                            .map(Role::getName)
-                            .anyMatch(roleName -> roleName != null && roleName.equals(PredefinedRole.USER_ROLE.getName())))
-                    .map(userMapper::toCustomerResponse).toList();
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
-    }
-
-    public UserResponse getUser(UUID userId) {
-        return userMapper.toUserResponse(
-                userRepository.findByIdAndDeletedFalse(userId)
-                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
-    }
-
-    public void deleteUser(UUID userId) {
-        User user = userRepository.findByIdAndDeletedFalse(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        user.setDeleted(true);
-
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
 }

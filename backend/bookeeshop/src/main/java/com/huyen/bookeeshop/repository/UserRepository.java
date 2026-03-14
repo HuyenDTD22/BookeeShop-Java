@@ -6,13 +6,16 @@ import java.util.UUID;
 
 import com.huyen.bookeeshop.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
     boolean existsByUsername(String username);
 
     Optional<User> findByUsernameAndDeletedFalse(String username);
+
+    Optional<User> findByUsernameAndDeletedFalseAndLockedFalse(String username);
 
     Optional<User> findByIdAndDeletedFalse(UUID id);
 
