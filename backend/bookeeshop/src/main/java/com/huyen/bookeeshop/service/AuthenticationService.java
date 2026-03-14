@@ -24,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.nimbusds.jose.*;
@@ -58,7 +59,8 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     protected long refreshableDuration;
 
-    // Hàm kiểm tra token có hợp lệ hay không
+    // 1. Hàm kiểm tra token có hợp lệ hay không
+    @Transactional
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
 
@@ -73,6 +75,8 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
+    // 2. Đăng nhập
+    @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository
                 .findByUsernameAndDeletedFalse(request.getUsername())
@@ -88,6 +92,8 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
+    // 3. Đăng xuất
+    @Transactional
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), true);
@@ -104,6 +110,8 @@ public class AuthenticationService {
         }
     }
 
+    // 4. Refresh token
+    @Transactional
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(), true);
 
