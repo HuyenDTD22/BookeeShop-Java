@@ -1,5 +1,6 @@
 package com.huyen.bookeeshop.controller.admin;
 
+import com.huyen.bookeeshop.dto.request.AdminBookFilterRequest;
 import com.huyen.bookeeshop.dto.request.BookCreationRequest;
 import com.huyen.bookeeshop.dto.request.BookUpdateRequest;
 import com.huyen.bookeeshop.dto.response.ApiResponse;
@@ -10,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,9 +49,9 @@ public class AdminBookController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('BOOK_LIST_VIEW')")
-    ApiResponse<List<BookResponse>> getAll() {
-        return ApiResponse.<List<BookResponse>>builder()
-                .result(bookService.getAll())
+    ApiResponse<Page<BookResponse>> getAll(@ModelAttribute AdminBookFilterRequest filter) {
+        return ApiResponse.<Page<BookResponse>>builder()
+                .result(bookService.getAll(filter))
                 .build();
     }
 
