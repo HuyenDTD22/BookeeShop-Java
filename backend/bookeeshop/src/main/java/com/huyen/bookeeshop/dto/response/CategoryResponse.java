@@ -3,7 +3,6 @@ package com.huyen.bookeeshop.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -22,6 +21,6 @@ public class CategoryResponse {
 
     UUID parentId;
 
-    LocalDateTime createdAt;
+    String parentName;
 
 }

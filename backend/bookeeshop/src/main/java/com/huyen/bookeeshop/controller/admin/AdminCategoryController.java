@@ -4,6 +4,7 @@ import com.huyen.bookeeshop.dto.request.CategoryCreationRequest;
 import com.huyen.bookeeshop.dto.request.CategoryUpdateRequest;
 import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.CategoryResponse;
+import com.huyen.bookeeshop.dto.response.CategoryTreeResponse;
 import com.huyen.bookeeshop.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -47,8 +48,8 @@ public class AdminCategoryController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('CATEGORY_LIST_VIEW')")
-    ApiResponse<List<CategoryResponse>> getAll() {
-        return ApiResponse.<List<CategoryResponse>>builder()
+    ApiResponse<List<CategoryTreeResponse>> getAll() {
+        return ApiResponse.<List<CategoryTreeResponse>>builder()
                 .result(categoryService.getAll())
                 .build();
     }

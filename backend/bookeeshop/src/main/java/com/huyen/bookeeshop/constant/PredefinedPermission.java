@@ -42,6 +42,12 @@ public class PredefinedPermission {
     public static final String CATEGORY_VIEW = "CATEGORY_VIEW";
     public static final String CATEGORY_DELETE = "CATEGORY_DELETE";
 
+    public static final String ORDER_APPROVE = "ORDER_APPROVE";
+    public static final String ORDER_UPDATE = "ORDER_UPDATE";
+    public static final String ORDER_LIST_VIEW = "ORDER_LIST_VIEW";
+    public static final String ORDER_VIEW = "ORDER_VIEW";
+    public static final String ORDER_DELETE = "ORDER_DELETE";
+
     public static List<String> getAllPermissions() {
         return List.of(
                 USER_CREATE,
@@ -72,7 +78,12 @@ public class PredefinedPermission {
                 CATEGORY_UPDATE,
                 CATEGORY_LIST_VIEW,
                 CATEGORY_VIEW,
-                CATEGORY_DELETE
+                CATEGORY_DELETE,
+                ORDER_APPROVE,
+                ORDER_UPDATE,
+                ORDER_LIST_VIEW,
+                ORDER_VIEW,
+                ORDER_DELETE
         );
     }
 }

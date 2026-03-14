@@ -17,4 +17,6 @@ public class CategoryUpdateRequest {
 
     UUID parentId;
 
+    Boolean removeParent;
+
 }

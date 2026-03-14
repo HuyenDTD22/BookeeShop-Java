@@ -29,11 +29,17 @@ public enum ErrorCode {
     BOOK_NOT_FOUND(1015, "Role not found", HttpStatus.NOT_FOUND),
     CATEGORY_EXISTED(1016, "Category existed", HttpStatus.BAD_REQUEST),
     CATEGORY_NOT_FOUND(1017, "Category not found", HttpStatus.NOT_FOUND),
-    ORDER_NOT_FOUND(1018, "Order not found", HttpStatus.NOT_FOUND),
-    ORDER_ALREADY_DELETED(1019, "Order has already been deleted", HttpStatus.BAD_REQUEST),
-    ORDER_CANNOT_BE_MODIFIED(1020, "Order cannot be modified in its current status", HttpStatus.BAD_REQUEST),
-    ORDER_BULK_UPDATE_FAILED(1021, "Some orders could not be updated", HttpStatus.BAD_REQUEST),
-    INVALID_ORDER_STATUS_TRANSITION(1022, "Invalid order status transition", HttpStatus.BAD_REQUEST)
+    CATEGORY_CIRCULAR_REFERENCE(1018, "Category circular reference", HttpStatus.BAD_REQUEST),
+    CATEGORY_HAS_CHILDREN(1019, "Category has children", HttpStatus.CONFLICT),
+    CATEGORY_HAS_BOOKS(1020, "Category has books", HttpStatus.CONFLICT),
+    ORDER_NOT_FOUND(1021, "Order not found", HttpStatus.NOT_FOUND),
+    ORDER_ALREADY_DELETED(1022, "Order has already been deleted", HttpStatus.BAD_REQUEST),
+    ORDER_CANNOT_BE_MODIFIED(1023, "Order cannot be modified in its current status", HttpStatus.BAD_REQUEST),
+    ORDER_BULK_UPDATE_FAILED(1024, "Some orders could not be updated", HttpStatus.BAD_REQUEST),
+    INVALID_ORDER_STATUS_TRANSITION(1025, "Invalid order status transition", HttpStatus.BAD_REQUEST),
+    INVALID_OLD_PASSWORD(1026, "Old password is incorrect", HttpStatus.BAD_REQUEST),
+    CANNOT_DELETE_YOURSELF(1027, "You cannot delete your own account", HttpStatus.BAD_REQUEST),
+    CANNOT_LOCK_YOURSELF(1028, "You cannot lock your own account", HttpStatus.BAD_REQUEST),
     ;
 
     int code;
