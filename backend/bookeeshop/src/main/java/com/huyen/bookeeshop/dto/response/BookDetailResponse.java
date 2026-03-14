@@ -1,35 +1,40 @@
-package com.huyen.bookeeshop.dto.request;
+package com.huyen.bookeeshop.dto.response;
 
-import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookUpdateRequest {
+public class BookDetailResponse {
+    UUID id;
+
+    String thumbnail;
+
     String title;
 
     String description;
 
-    @Min(0)
-    Double price;
-
-    @Min(0)
-    Double discountPercentage;
-
-    @Min(0)
-    Integer stock;
-
     String author;
 
-    String supplier;
+    Double price;
+
+    Double discountPercentage;
+
+    Double finalPrice;
+
+    Integer stock;
+
+    Boolean inStock;
 
     String publisher;
+
+    String supplier;
 
     Integer publishYear;
 
@@ -37,14 +42,21 @@ public class BookUpdateRequest {
 
     String size;
 
-    @Min(0)
     Double weight;
 
-    @Min(1)
     Integer pageCount;
 
     Boolean feature;
 
+    LocalDateTime createdAt;
+
     UUID categoryId;
 
+    String categoryName;
+
+    Double averageRating;
+
+    Long totalRatings;
+
+    Long purchaseCount;
 }

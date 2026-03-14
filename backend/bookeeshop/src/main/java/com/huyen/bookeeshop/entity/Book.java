@@ -65,8 +65,9 @@ public class Book {
     @Column(name = "page_count", nullable = false)
     Integer pageCount;
 
+    @Builder.Default
     @Column(nullable = false)
-    Boolean feature;
+    Boolean feature = false;
 
     @Builder.Default
     @Column(nullable = false)
