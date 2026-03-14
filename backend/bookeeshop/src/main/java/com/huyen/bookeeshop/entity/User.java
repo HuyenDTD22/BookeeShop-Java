@@ -47,11 +47,18 @@ public class User {
 
     @Builder.Default
     @Column(nullable = false)
+    Boolean locked = false;
+
+    @Builder.Default
+    @Column(nullable = false)
     Boolean deleted = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
+
+    @Column(name = "deleted_at")
+    LocalDateTime deletedAt;
 
     @ManyToMany
     @JoinTable(
