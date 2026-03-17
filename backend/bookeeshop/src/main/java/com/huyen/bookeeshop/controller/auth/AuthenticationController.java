@@ -10,6 +10,7 @@ import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.AuthenticationResponse;
 import com.huyen.bookeeshop.dto.response.IntrospectResponse;
 import com.huyen.bookeeshop.service.AuthenticationService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,14 +30,14 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+    ApiResponse<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
 
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request)
+    ApiResponse<IntrospectResponse> authenticate(@RequestBody @Valid IntrospectRequest request)
             throws JOSEException, ParseException {
         var result = authenticationService.introspect(request);
 
@@ -44,7 +45,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    ApiResponse<AuthenticationResponse> refreshToken(@RequestBody RefreshRequest request)
+    ApiResponse<AuthenticationResponse> refreshToken(@RequestBody @Valid RefreshRequest request)
             throws ParseException, JOSEException {
         var result = authenticationService.refreshToken(request);
 
@@ -52,7 +53,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws JOSEException, ParseException {
+    ApiResponse<Void> logout(@RequestBody @Valid LogoutRequest request) throws JOSEException, ParseException {
         authenticationService.logout(request);
 
         return ApiResponse.<Void>builder().build();

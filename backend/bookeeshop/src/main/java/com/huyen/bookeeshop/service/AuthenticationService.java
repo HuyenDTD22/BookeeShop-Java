@@ -60,7 +60,6 @@ public class AuthenticationService {
     protected long refreshableDuration;
 
     // 1. Hàm kiểm tra token có hợp lệ hay không
-    @Transactional
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
 
@@ -76,10 +75,8 @@ public class AuthenticationService {
     }
 
     // 2. Đăng nhập
-    @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        var user = userRepository
-                .findByUsernameAndDeletedFalse(request.getUsername())
+        var user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -93,7 +90,6 @@ public class AuthenticationService {
     }
 
     // 3. Đăng xuất
-    @Transactional
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), true);
@@ -111,7 +107,6 @@ public class AuthenticationService {
     }
 
     // 4. Refresh token
-    @Transactional
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(), true);
 
@@ -125,8 +120,8 @@ public class AuthenticationService {
 
         var username = signedJWT.getJWTClaimsSet().getSubject();
 
-        var user =
-                userRepository.findByUsernameAndDeletedFalse(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+        var user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(username)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         var token = generateToken(user);
 

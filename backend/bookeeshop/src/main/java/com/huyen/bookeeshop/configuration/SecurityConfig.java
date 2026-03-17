@@ -26,8 +26,20 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     // Các API không cần đăng nhập
-    private static final String[] PUBLIC_ENDPOINTS = {
-        "/users/register", "/auth/login", "/auth/introspect", "/auth/logout", "/auth/refresh"
+    private static final String[] PUBLIC_POST_ENDPOINTS = {
+            "/users/register",
+            "/auth/login",
+            "/auth/introspect",
+            "/auth/logout",
+            "/auth/refresh",
+    };
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/books",
+            "/books/**",
+            "/categories",
+            "/ratings/books/**",
+            "/comments/books/**",
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -39,11 +51,13 @@ public class SecurityConfig {
     // Luồng bảo mật - Mỗi request đi vào server → phải đi qua chuỗi bảo vệ này
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        // Cấu hình ai được phép gọi API
-        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
-                .permitAll()
+        // Các endpoint public → Cho phép truy cập mà không cần xác thực
+        httpSecurity.authorizeHttpRequests(request -> request
+                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest()
-                .authenticated());
+                .authenticated()
+        );
 
         // Cấu hình xác thực bằng JWT - Khi có token -> Dùng jwtDecoder() để kiểm tra token
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer

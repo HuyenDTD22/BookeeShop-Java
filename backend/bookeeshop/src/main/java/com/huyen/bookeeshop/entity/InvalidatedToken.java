@@ -17,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "invalidated_token")
 public class InvalidatedToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(updatable = false, nullable = false)
     String id;
 

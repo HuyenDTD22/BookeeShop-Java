@@ -48,6 +48,19 @@ public class PredefinedPermission {
     public static final String ORDER_VIEW = "ORDER_VIEW";
     public static final String ORDER_DELETE = "ORDER_DELETE";
 
+    public static final String RATING_VIEW = "RATING_VIEW";
+
+    public static final String COMMENT_LIST_VIEW = "COMMENT_LIST_VIEW";
+    public static final String COMMENT_REPLY = "COMMENT_REPLY";
+    public static final String COMMENT_DELETE = "COMMENT_DELETE";
+
+    public static final String NOTIFICATION_CREATE = "NOTIFICATION_CREATE";
+    public static final String NOTIFICATION_UPDATE = "NOTIFICATION_UPDATE";
+    public static final String NOTIFICATION_LIST_VIEW = "NOTIFICATION_LIST_VIEW";
+    public static final String NOTIFICATION_VIEW = "NOTIFICATION_VIEW";
+    public static final String NOTIFICATION_DELETE = "NOTIFICATION_DELETE";
+    public static final String NOTIFICATION_CANCEL = "NOTIFICATION_CANCEL";
+
     public static List<String> getAllPermissions() {
         return List.of(
                 USER_CREATE,
@@ -83,7 +96,17 @@ public class PredefinedPermission {
                 ORDER_UPDATE,
                 ORDER_LIST_VIEW,
                 ORDER_VIEW,
-                ORDER_DELETE
+                ORDER_DELETE,
+                RATING_VIEW,
+                COMMENT_LIST_VIEW,
+                COMMENT_REPLY,
+                COMMENT_DELETE,
+                NOTIFICATION_CREATE,
+                NOTIFICATION_UPDATE,
+                NOTIFICATION_LIST_VIEW,
+                NOTIFICATION_VIEW,
+                NOTIFICATION_DELETE,
+                NOTIFICATION_CANCEL
         );
     }
 }
