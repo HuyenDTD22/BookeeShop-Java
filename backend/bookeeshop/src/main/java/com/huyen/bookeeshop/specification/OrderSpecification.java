@@ -42,6 +42,14 @@ public class OrderSpecification {
                 predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), request.getToDate()));
             }
 
+            // Tìm theo tên hoặc số điện thoại (không phân biệt hoa thường)
+            if (request.getKeyword() != null && !request.getKeyword().isBlank()) {
+                String kw = "%" + request.getKeyword().toLowerCase() + "%";
+                Predicate byName = cb.like(cb.lower(root.get("fullName")), kw);
+                Predicate byPhone = cb.like(root.get("phone"), kw);
+                predicates.add(cb.or(byName, byPhone));
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

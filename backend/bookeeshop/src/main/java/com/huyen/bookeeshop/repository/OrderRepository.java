@@ -21,9 +21,12 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     List<Order> findByIdInAndDeletedFalse(List<UUID> ids);
 
+    List<Order> findByUserIdAndDeletedFalseOrderByCreatedAtDesc(UUID userId);
+
+    Optional<Order> findByIdAndUserIdAndDeletedFalse(UUID id, UUID userId);
+
     @Modifying
     @Query("UPDATE Order o SET o.status = :status WHERE o.id IN :ids AND o.deleted = false")
     int bulkUpdateStatus(@Param("ids") List<UUID> ids, @Param("status") OrderStatus status);
 
-    List<Order> findAllByDeletedFalse();
 }

@@ -22,6 +22,9 @@ public class OrderItem {
     @Column(nullable = false)
     String title;
 
+    @Column
+    String thumbnail;
+
     @Column(nullable = false)
     Double price;
 

@@ -20,6 +20,9 @@ public class OrderFilterRequest {
     PaymentStatus paymentStatus;
     OrderStatus status;
 
+    // Tìm theo tên hoặc số điện thoại khách hàng
+    String keyword;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     LocalDateTime fromDate;
 

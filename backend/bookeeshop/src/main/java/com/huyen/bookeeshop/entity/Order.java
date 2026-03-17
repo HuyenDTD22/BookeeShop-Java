@@ -35,6 +35,9 @@ public class Order {
     @Column(nullable = false)
     String address;
 
+    @Column
+    String note;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
@@ -56,6 +59,12 @@ public class Order {
     @Builder.Default
     @Column(nullable = false, updatable = false)
     Boolean deleted = false;
+
+    @Column(name = "vnpay_transaction_id")
+    String vnpayTransactionId;
+
+    @Column(name = "paid_at")
+    LocalDateTime paidAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

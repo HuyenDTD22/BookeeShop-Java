@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -55,10 +54,10 @@ public class AdminOrderController {
 
     @PatchMapping("/bulk-status")
     @PreAuthorize("hasAuthority('ORDER_APPROVE')")
-    ApiResponse<List<OrderResponse>> bulkUpdateOrderStatus(@RequestBody @Valid BulkOrderStatusUpdateRequest request) {
+    ApiResponse<String> bulkUpdateOrderStatus(@RequestBody @Valid BulkOrderStatusUpdateRequest request) {
         orderService.bulkUpdateOrderStatus(request);
 
-        return ApiResponse.<List<OrderResponse>>builder()
+        return ApiResponse.<String>builder()
                 .message("Bulk order status update successful")
                 .build();
     }

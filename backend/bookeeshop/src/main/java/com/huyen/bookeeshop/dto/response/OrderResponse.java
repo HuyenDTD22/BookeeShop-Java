@@ -20,11 +20,15 @@ public class OrderResponse {
     String fullName;
     String phone;
     String address;
+    String note;
     PaymentStatus paymentStatus;
     PaymentMethod paymentMethod;
     Double totalAmount;
     OrderStatus status;
+    String vnpayTransactionId;
+    LocalDateTime paidAt;
     LocalDateTime createdAt;
+    LocalDateTime deletedAt;
 
     // User info
     UUID userId;
