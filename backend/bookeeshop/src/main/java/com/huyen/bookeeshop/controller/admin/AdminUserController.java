@@ -46,7 +46,7 @@ public class AdminUserController {
     @PutMapping(value = "/staff/{userId}", consumes = "multipart/form-data")
     @PreAuthorize("hasAuthority('STAFF_UPDATE')")
     ApiResponse<UserResponse> updateStaff(@PathVariable UUID userId,
-                                          @RequestPart("data") StaffUpdateRequest request,
+                                          @RequestPart("data") @Valid StaffUpdateRequest request,
                                           @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateStaff(userId, request, avatar))
@@ -69,7 +69,7 @@ public class AdminUserController {
                 .build();
     }
 
-    @GetMapping("/staff/myInfo")
+    @GetMapping("/staff/me")
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())

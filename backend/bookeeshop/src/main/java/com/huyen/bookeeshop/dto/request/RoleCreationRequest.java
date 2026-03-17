@@ -10,9 +10,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleCreationRequest {
-    @NotBlank
+    @NotBlank(message = "INVALID_NAME_ROLE")
     String name;
 
-    @NotBlank
+    @NotBlank(message = "INVALID_DISPLAY_NAME_ROLE")
     String displayName;
 }

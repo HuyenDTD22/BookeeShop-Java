@@ -1,16 +1,18 @@
-package com.huyen.bookeeshop.dto.response;
+package com.huyen.bookeeshop.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PermissionResponse {
-    UUID id;
-    String name;
+public class RolePermissionUpdateRequest {
+
+    Set<UUID> permissionIds;
+
 }

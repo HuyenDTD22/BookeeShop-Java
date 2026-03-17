@@ -3,6 +3,7 @@ package com.huyen.bookeeshop.exception;
 import com.huyen.bookeeshop.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,8 +20,10 @@ public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
 
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+    ResponseEntity<ApiResponse> handlingRuntimeException(Exception exception) {
         ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
+
+        log.error("Exception: ", exception);
 
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
@@ -54,6 +57,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
+
+        log.info("Lỗi tar về : " + exception);
 
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
 

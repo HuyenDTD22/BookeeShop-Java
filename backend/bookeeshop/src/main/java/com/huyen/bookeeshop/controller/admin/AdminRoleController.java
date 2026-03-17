@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.huyen.bookeeshop.dto.request.RoleCreationRequest;
+import com.huyen.bookeeshop.dto.request.RolePermissionUpdateRequest;
 import com.huyen.bookeeshop.dto.request.RoleUpdateRequest;
 import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.RoleResponse;
@@ -28,7 +29,7 @@ public class AdminRoleController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<RoleResponse> create(@RequestBody RoleCreationRequest request) {
+    ApiResponse<RoleResponse> create(@RequestBody @Valid RoleCreationRequest request) {
         return ApiResponse.<RoleResponse>builder()
                 .result(roleService.create(request))
                 .build();
@@ -57,6 +58,14 @@ public class AdminRoleController {
 
         return ApiResponse.<String>builder()
                 .result("Role has been deleted")
+                .build();
+    }
+
+    @PutMapping("/{roleId}/permissions")
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<RoleResponse> setPermissions(@PathVariable UUID roleId, @RequestBody RolePermissionUpdateRequest request) {
+        return ApiResponse.<RoleResponse>builder()
+                .result(roleService.setPermissions(roleId, request))
                 .build();
     }
 }

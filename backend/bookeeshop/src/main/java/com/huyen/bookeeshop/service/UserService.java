@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -48,7 +47,6 @@ public class UserService {
     //==========================================================================
 
     // 1. ADMIN - Tạo tài khoản nhân viên
-    @Transactional
     public UserResponse createStaff(StaffCreationRequest request, MultipartFile avatar) {
         User user = userMapper.toStaff(request);
 
@@ -73,7 +71,6 @@ public class UserService {
     }
 
     // 2. ADMIN - Cập nhật thông tin nhân viên
-    @Transactional
     public UserResponse updateStaff(UUID userId, StaffUpdateRequest request, MultipartFile avatar) {
         User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -98,7 +95,6 @@ public class UserService {
     }
 
     // 3. ADMIN - Xem danh sách nhân viên
-    @Transactional(readOnly = true)
     public Page<StaffResponse> getStaffs(StaffFilterRequest filter) {
         Specification<User> spec = UserSpecification.staffWithFilter(filter);
 
@@ -110,7 +106,6 @@ public class UserService {
     }
 
     // 4. ADMIN - Xem danh sách khách hàng
-    @Transactional(readOnly = true)
     public Page<CustomerResponse> getCustomers(CustomerFilterRequest filter) {
         Specification<User> spec = UserSpecification.customerWithFilter(filter);
 
@@ -122,7 +117,6 @@ public class UserService {
     }
 
     // 5. ADMIN - Xem chi tiết nhân viên hoặc khách hàng
-    @Transactional(readOnly = true)
     public UserResponse getUser(UUID userId) {
         return userMapper.toUserResponse(
                 userRepository.findByIdAndDeletedFalse(userId)
@@ -148,7 +142,6 @@ public class UserService {
     }
 
     // 7. ADMIN - Khóa/Mở khóa tài khoản nhân viên hoặc khách hàng
-    @Transactional
     public UserResponse toggleLock(UUID userId) {
         User currentUser = userRepository.findByUsernameAndDeletedFalse(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -212,7 +205,6 @@ public class UserService {
     //==========================================================================
 
     // 1. CLIENT - Khách hàng đăng ký tài khoản
-    @Transactional
     public UserResponse registerCustomer(CustomerCreationRequest request) {
         User user = userMapper.toCustomer(request);
 
@@ -233,7 +225,6 @@ public class UserService {
     }
 
     // 2. CLIENT - Xem thông tin cá nhân
-    @Transactional(readOnly = true)
     public UserResponse getMyInfo() {
         User user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -242,7 +233,6 @@ public class UserService {
     }
 
     // 3. CLIENT - Cập nhật thông tin cá nhân
-    @Transactional
     public UserResponse updateMyProfile(CustomerUpdateRequest request, MultipartFile avatar) {
         User user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -262,7 +252,6 @@ public class UserService {
     }
 
     // 4. CLIENT - Đổi mật khẩu
-    @Transactional
     public void changePassword(ChangePasswordRequest request) {
         User user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(getCurrentUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
