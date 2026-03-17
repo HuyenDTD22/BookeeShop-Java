@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -30,7 +29,6 @@ public class CategoryService {
     CloudinaryService cloudinaryService;
 
     // 1. ADMIN - Tạo mới 1 category
-    @Transactional
     public CategoryResponse create(CategoryCreationRequest request, MultipartFile thumbnail) {
         var category = categoryMapper.toCategory(request);
 
@@ -56,7 +54,6 @@ public class CategoryService {
     }
 
     // 2. ADMIN - Cập nhật thông tin category
-    @Transactional
     public CategoryResponse update(UUID categoryId, CategoryUpdateRequest request, MultipartFile thumbnail)  {
         var category = categoryRepository.findByIdAndDeletedFalse(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -89,7 +86,6 @@ public class CategoryService {
     }
 
     // 3. ADMIN/CLIENT - Lấy thông tin tất cả category theo cấu trúc cây
-    @Transactional(readOnly = true)
     public List<CategoryTreeResponse> getAll() {
         try {
             return categoryRepository.findRootCategories()
@@ -103,7 +99,6 @@ public class CategoryService {
     }
 
     // 4. ADMIN - Lấy thông tin category theo ID
-    @Transactional(readOnly = true)
     public CategoryResponse getById(UUID categoryId) {
         return categoryRepository.findByIdAndDeletedFalse(categoryId)
                 .map(categoryMapper::toCategoryResponse)
@@ -111,7 +106,6 @@ public class CategoryService {
     }
 
     // 5. ADMIN - Xóa category (soft delete)
-    @Transactional
     public void delete(UUID categoryId) {
         Category category = categoryRepository.findByIdAndDeletedFalse(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
