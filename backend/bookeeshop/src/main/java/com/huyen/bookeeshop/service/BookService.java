@@ -26,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -47,7 +46,6 @@ public class BookService {
     //==========================================================================
 
     // 1. ADMIN - Tạo sách mới
-    @Transactional
     public BookResponse create(BookCreationRequest request, MultipartFile thumbnail) {
         Category category = categoryRepository.findByIdAndDeletedFalse(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -70,7 +68,6 @@ public class BookService {
     }
 
     // 2. ADMIN - Cập nhật thông tin sách
-    @Transactional
     public BookResponse update(UUID bookId, BookUpdateRequest request, MultipartFile thumbnail)  {
         var book = bookRepository.findByIdAndDeletedFalse(bookId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
@@ -92,7 +89,6 @@ public class BookService {
     }
 
     // 3. ADMIN - Lấy danh sách tất cả sách có phân trang, tìm kiếm, lọc, sắp xếp
-    @Transactional(readOnly = true)
     public Page<BookResponse> getAll(AdminBookFilterRequest filter) {
         List<UUID> categoryIds = null;
 
@@ -114,7 +110,6 @@ public class BookService {
     }
 
     // 4. ADMIN - Lấy thông tin chi tiết một cuốn sách
-    @Transactional(readOnly = true)
     public BookResponse getById(UUID bookId) {
         return bookRepository.findByIdAndDeletedFalse(bookId)
                 .map(bookMapper::toBookResponse)
@@ -122,7 +117,6 @@ public class BookService {
     }
 
     // 5. ADMIN - Xóa sách (soft delete)
-    @Transactional
     public void delete(UUID bookId) {
         Book book = bookRepository.findByIdAndDeletedFalse(bookId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
@@ -155,7 +149,6 @@ public class BookService {
     //==========================================================================
 
     // 1. CLIENT - Lấy danh sách sách với phân trang, lọc và sắp xếp
-    @Transactional(readOnly = true)
     public Page<BookCardResponse> getAllBooks(BookFilterRequest filter) {
         Specification<Book> spec = BookSpecification.withFilter(filter);
 
@@ -164,7 +157,6 @@ public class BookService {
     }
 
     // 2. CLIENT - Lấy danh sách sách nổi bật với phân trang, lọc và sắp xếp
-    @Transactional(readOnly = true)
     public Page<BookCardResponse> getFeaturedBooks(BookFilterRequest filter) {
         Specification<Book> spec = BookSpecification.featuredWithFilter(filter);
 
@@ -173,7 +165,6 @@ public class BookService {
     }
 
     // 3. CLIENT - Lấy danh sách sách mới nhất với phân trang, lọc và sắp xếp
-    @Transactional(readOnly = true)
     public Page<BookCardResponse> getNewestBooks(BookFilterRequest filter) {
         filter.setSortBy("createdAt");
         filter.setSortDir("desc");
@@ -185,7 +176,6 @@ public class BookService {
     }
 
     // 4. CLIENT - Lấy danh sách sách theo danh mục (hỗ trợ lọc con)
-    @Transactional(readOnly = true)
     public Page<BookCardResponse> getBooksByCategory(UUID categoryId, BookFilterRequest filter) {
         categoryRepository.findByIdAndDeletedFalse(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -204,7 +194,6 @@ public class BookService {
     }
 
     // 5. CLIENT - Lấy thông tin chi tiết một cuốn sách
-    @Transactional(readOnly = true)
     public BookDetailResponse getBookById(UUID bookId) {
         Book book = bookRepository.findByIdAndDeletedFalse(bookId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));

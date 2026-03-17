@@ -19,6 +19,8 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
 
     Optional<Book> findByIdAndDeletedFalse(UUID id);
 
+    boolean existsByIdAndDeletedFalse(UUID id);
+
     List<Book> findAllByDeletedFalse();
 
     Page<Book> findAllByDeletedFalse(Pageable pageable);
