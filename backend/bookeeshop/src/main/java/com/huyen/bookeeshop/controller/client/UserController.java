@@ -2,10 +2,13 @@ package com.huyen.bookeeshop.controller.client;
 
 import com.huyen.bookeeshop.dto.request.ChangePasswordRequest;
 import com.huyen.bookeeshop.dto.request.CustomerCreationRequest;
-import com.huyen.bookeeshop.dto.request.CustomerUpdateRequest;
+import com.huyen.bookeeshop.dto.request.UserUpdateRequest;
 import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.UserResponse;
 import com.huyen.bookeeshop.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "User", description = "User APIs for client")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class UserController {
 
     UserService userService;
 
+    @Operation(summary = "Register a new customer")
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     ApiResponse<UserResponse> registerCustomer(@RequestBody @Valid CustomerCreationRequest request) {
@@ -35,6 +40,8 @@ public class UserController {
                 .build();
     }
 
+    @Operation(summary = "Get current user's information")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/me")
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
@@ -42,8 +49,10 @@ public class UserController {
                 .build();
     }
 
+    @Operation(summary = "Update current user's profile")
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping(value = "/me", consumes = "multipart/form-data")
-    ApiResponse<UserResponse> updateMyProfile(@RequestPart("data") @Valid CustomerUpdateRequest request,
+    ApiResponse<UserResponse> updateMyProfile(@RequestPart("data") @Valid UserUpdateRequest request,
                                               @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
         return ApiResponse.<UserResponse>builder()
                 .message("Update information success!")
@@ -51,6 +60,8 @@ public class UserController {
                 .build();
     }
 
+    @Operation(summary = "Change current user's password")
+    @SecurityRequirement(name = "bearerAuth")
     @PatchMapping("/me/password")
     ApiResponse<String> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         userService.changePassword(request);

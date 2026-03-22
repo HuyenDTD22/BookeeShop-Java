@@ -14,7 +14,7 @@ public class CustomerFilterRequest {
     int page = 0;
 
     @Builder.Default
-    int size = 20;
+    int size = 10;
 
     // Tìm kiếm theo tên hoặc số điện thoại
     String keyword;

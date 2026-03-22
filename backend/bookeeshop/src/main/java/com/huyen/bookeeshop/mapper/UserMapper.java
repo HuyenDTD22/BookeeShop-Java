@@ -1,7 +1,7 @@
 package com.huyen.bookeeshop.mapper;
 
 import com.huyen.bookeeshop.dto.request.CustomerCreationRequest;
-import com.huyen.bookeeshop.dto.request.CustomerUpdateRequest;
+import com.huyen.bookeeshop.dto.request.UserUpdateRequest;
 import com.huyen.bookeeshop.dto.request.StaffCreationRequest;
 import com.huyen.bookeeshop.dto.request.StaffUpdateRequest;
 import com.huyen.bookeeshop.dto.response.CustomerResponse;
@@ -55,7 +55,7 @@ public interface UserMapper {
     @Mapping(target = "userNotifications", ignore = true)
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "ratings", ignore = true)
-    void updateCustomer(@MappingTarget User user, CustomerUpdateRequest request);
+    void updateCustomer(@MappingTarget User user, UserUpdateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "roles", ignore = true)
@@ -78,6 +78,8 @@ public interface UserMapper {
 
     StaffResponse toStaffResponse(User user);
 
+    @Mapping(target = "locked",    source = "locked")
+    @Mapping(target = "createdAt", source = "createdAt")
     UserResponse toUserResponse(User user);
 
 }

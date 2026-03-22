@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,5 +22,7 @@ public class UserResponse {
     String phone;
     String address;
     String avatar;
+    Boolean locked;
+    LocalDateTime createdAt;
     Set<RoleResponse> roles;
 }

@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CustomerUpdateRequest {
+public class UserUpdateRequest {
 
     @Size(min = 8, max = 100, message = "PASSWORD_INVALID")
     String password;
