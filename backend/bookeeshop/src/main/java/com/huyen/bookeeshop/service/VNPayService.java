@@ -68,23 +68,23 @@ public class VNPayService {
 
         // Gom tất cả params trừ vnp_SecureHash vào TreeMap để tự sort
         Map<String, String> vnpParams = new TreeMap<>();
-        putIfNotNull(vnpParams, "vnp_TmnCode",           returnRequest.getVnpTmnCode());
-        putIfNotNull(vnpParams, "vnp_BankCode",          returnRequest.getVnpBankCode());
-        putIfNotNull(vnpParams, "vnp_BankTranNo",        returnRequest.getVnpBankTranNo());
-        putIfNotNull(vnpParams, "vnp_CardType",          returnRequest.getVnpCardType());
-        putIfNotNull(vnpParams, "vnp_OrderInfo",         returnRequest.getVnpOrderInfo());
-        putIfNotNull(vnpParams, "vnp_Amount",            returnRequest.getVnpAmount());
-        putIfNotNull(vnpParams, "vnp_CurrCode",          returnRequest.getVnpCurrCode());
-        putIfNotNull(vnpParams, "vnp_TxnRef",            returnRequest.getVnpTxnRef());
-        putIfNotNull(vnpParams, "vnp_TransactionNo",     returnRequest.getVnpTransactionNo());
+        putIfNotNull(vnpParams, "vnp_TmnCode", returnRequest.getVnpTmnCode());
+        putIfNotNull(vnpParams, "vnp_BankCode", returnRequest.getVnpBankCode());
+        putIfNotNull(vnpParams, "vnp_BankTranNo", returnRequest.getVnpBankTranNo());
+        putIfNotNull(vnpParams, "vnp_CardType", returnRequest.getVnpCardType());
+        putIfNotNull(vnpParams, "vnp_OrderInfo", returnRequest.getVnpOrderInfo());
+        putIfNotNull(vnpParams, "vnp_Amount", returnRequest.getVnpAmount());
+        putIfNotNull(vnpParams, "vnp_CurrCode", returnRequest.getVnpCurrCode());
+        putIfNotNull(vnpParams, "vnp_TxnRef", returnRequest.getVnpTxnRef());
+        putIfNotNull(vnpParams, "vnp_TransactionNo", returnRequest.getVnpTransactionNo());
         putIfNotNull(vnpParams, "vnp_TransactionStatus", returnRequest.getVnpTransactionStatus());
-        putIfNotNull(vnpParams, "vnp_ResponseCode",      returnRequest.getVnpResponseCode());
-        putIfNotNull(vnpParams, "vnp_PayDate",           returnRequest.getVnpPayDate());
+        putIfNotNull(vnpParams, "vnp_ResponseCode", returnRequest.getVnpResponseCode());
+        putIfNotNull(vnpParams, "vnp_PayDate", returnRequest.getVnpPayDate());
 
         String queryString = buildQueryString(vnpParams);
         String computedHash = hmacSHA512(hashSecret, queryString);
 
-        // So sánh không phân biệt hoa thường (VNPay đôi khi trả về uppercase)
+        // So sánh không phân biệt hoa thường
         return computedHash.equalsIgnoreCase(receivedHash);
     }
 
