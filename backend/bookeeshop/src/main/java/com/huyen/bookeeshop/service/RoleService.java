@@ -1,25 +1,22 @@
 package com.huyen.bookeeshop.service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
 import com.huyen.bookeeshop.dto.request.RoleCreationRequest;
-import com.huyen.bookeeshop.dto.request.RolePermissionUpdateRequest;
 import com.huyen.bookeeshop.dto.request.RoleUpdateRequest;
 import com.huyen.bookeeshop.dto.response.RoleResponse;
 import com.huyen.bookeeshop.entity.Role;
 import com.huyen.bookeeshop.exception.AppException;
 import com.huyen.bookeeshop.exception.ErrorCode;
 import com.huyen.bookeeshop.mapper.RoleMapper;
-import com.huyen.bookeeshop.repository.PermissionRepository;
 import com.huyen.bookeeshop.repository.RoleRepository;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +24,11 @@ import lombok.experimental.FieldDefaults;
 public class RoleService {
     RoleRepository roleRepository;
     RoleMapper roleMapper;
-    PermissionRepository permissionRepository;
 
-    // 1. ADMIN - Tạo mới 1 role
+    /**
+     * 1. ADMIN - Create a new role
+     */
+    @Transactional
     public RoleResponse create(RoleCreationRequest request) {
         String roleName = request.getName().trim().toUpperCase();
 
@@ -37,19 +36,20 @@ public class RoleService {
             roleName = "STAFF_" + roleName;
         }
 
-        var role = roleMapper.toRole(request);
-        role.setName(roleName);
-
-        try {
-            role = roleRepository.save(role);
-        } catch (DataIntegrityViolationException e) {
+        if(roleRepository.existsByNameAndDeletedFalse(roleName)) {
             throw new AppException(ErrorCode.ROLE_EXISTED);
         }
 
-        return roleMapper.toRoleResponse(role);
+        var role = roleMapper.toRole(request);
+        role.setName(roleName);
+
+        return roleMapper.toRoleResponse(roleRepository.save(role));
     }
 
-    // 2. ADMIN - Cập nhật thông tin role
+    /**
+     * 2. ADMIN - Update information of a role
+     */
+    @Transactional
     public RoleResponse update(UUID roleId, RoleUpdateRequest request)  {
         var role = roleRepository.findByIdAndDeletedFalse(roleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
@@ -60,22 +60,23 @@ public class RoleService {
             roleName = "STAFF_" + roleName;
         }
 
+        if(roleRepository.existsByNameAndDeletedFalse(roleName)) {
+            throw new AppException(ErrorCode.ROLE_EXISTED);
+        }
+
         roleMapper.updateRole(role, request);
 
         if(!role.getName().equals(roleName)) {
             role.setName(roleName);
         }
 
-        try {
-            role = roleRepository.save(role);
-        } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.ROLE_EXISTED);
-        }
-
-        return roleMapper.toRoleResponse(role);
+        return roleMapper.toRoleResponse(roleRepository.save(role));
     }
 
-    // 3. ADMIN - Lấy thông tin tất cả role
+    /**
+     * 3. ADMIN - Get all roles in the system
+     */
+    @Transactional(readOnly = true)
     public List<RoleResponse> getAll() {
         try {
             return roleRepository.findAllByDeletedFalse()
@@ -88,7 +89,10 @@ public class RoleService {
         }
     }
 
-    // 4. ADMIN - Xóa role (soft delete)
+    /**
+     * 4. ADMIN - Delete a role by ID (soft delete)
+     */
+    @Transactional
     public void delete(UUID roleId) {
         Role role = roleRepository.findByIdAndDeletedFalse(roleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
@@ -96,24 +100,5 @@ public class RoleService {
         role.setDeleted(true);
 
         roleRepository.save(role);
-    }
-
-    // 5. ADMIN - Gán permissions cho role
-    public RoleResponse setPermissions(UUID roleId, RolePermissionUpdateRequest request) {
-
-        Role role = roleRepository.findByIdAndDeletedFalse(roleId)
-                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
-
-        var permissions = permissionRepository.findAllById(request.getPermissionIds());
-
-        if (permissions.size() != request.getPermissionIds().size()) {
-            throw new AppException(ErrorCode.PERMISSION_NOT_FOUND);
-        }
-
-        role.setPermissions(new HashSet<>(permissions));
-
-        roleRepository.save(role);
-
-        return roleMapper.toRoleResponse(role);
     }
 }
