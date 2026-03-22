@@ -5,6 +5,9 @@ import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.BookCommentResponse;
 import com.huyen.bookeeshop.dto.response.CommentResponse;
 import com.huyen.bookeeshop.service.CommentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+@Tag(name = "Comment", description = "Comment APIs for client")
 @RestController
 @RequestMapping("/comments")
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class CommentController {
 
     CommentService commentService;
 
+    @Operation(summary = "Get all comments for a book")
     @GetMapping("/books/{bookId}")
     ApiResponse<BookCommentResponse> getCommentsByBookId(@PathVariable UUID bookId) {
         return ApiResponse.<BookCommentResponse>builder()
@@ -33,6 +38,8 @@ public class CommentController {
                 .build();
     }
 
+    @Operation(summary = "Create a new comment for a book")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     ApiResponse<CommentResponse> createComment(
@@ -43,6 +50,8 @@ public class CommentController {
                 .build();
     }
 
+    @Operation(summary = "Delete a comment by its ID")
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{commentId}")
     ApiResponse<Void> deleteComment(@PathVariable UUID commentId) {
         commentService.deleteComment(commentId);

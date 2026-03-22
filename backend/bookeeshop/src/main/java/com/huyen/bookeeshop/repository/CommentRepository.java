@@ -12,8 +12,6 @@ import java.util.UUID;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
-
-    // Lấy tất cả comment GỐC chưa bị xóa của 1 quyển sách
     @Query("""
             SELECT c FROM Comment c
             WHERE c.book.id = :bookId
@@ -25,7 +23,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     Optional<Comment> findByIdAndDeletedFalse(UUID id);
 
-    // Tìm comment theo id và userId
     @Query("""
             SELECT c FROM Comment c
             WHERE c.id = :commentId
@@ -35,7 +32,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
             """)
     Optional<Comment> findByIdAndUserId(@Param("commentId") UUID commentId, @Param("userId") UUID userId);
 
-    // Kiểm tra user đã có đơn hàng COMPLETED chứa sách này chưa.
     @Query("""
             SELECT COUNT(oi) > 0
             FROM OrderItem oi

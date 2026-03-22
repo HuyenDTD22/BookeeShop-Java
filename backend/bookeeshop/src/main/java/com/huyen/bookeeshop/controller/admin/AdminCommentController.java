@@ -5,6 +5,9 @@ import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.BookCommentResponse;
 import com.huyen.bookeeshop.dto.response.CommentResponse;
 import com.huyen.bookeeshop.service.CommentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+@Tag(name = "Comment", description = "Comment APIs for admin")
 @RestController
 @RequestMapping("/admin/comments")
 @RequiredArgsConstructor
@@ -27,6 +31,8 @@ public class AdminCommentController {
 
     CommentService commentService;
 
+    @Operation(summary = "Get all comments for a book")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/books/{bookId}")
     @PreAuthorize("hasAuthority('COMMENT_LIST_VIEW')")
     ApiResponse<BookCommentResponse> getCommentsByBookId(@PathVariable UUID bookId) {
@@ -35,6 +41,8 @@ public class AdminCommentController {
                 .build();
     }
 
+    @Operation(summary = "Reply to a comment")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping(value = "/{parentCommentId}/reply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('COMMENT_REPLY')")
@@ -47,6 +55,8 @@ public class AdminCommentController {
                 .build();
     }
 
+    @Operation(summary = "Delete a comment by its ID")
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{commentId}")
     @PreAuthorize("hasAuthority('COMMENT_DELETE')")
     ApiResponse<Void> deleteComment(@PathVariable UUID commentId) {

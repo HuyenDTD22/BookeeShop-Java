@@ -37,47 +37,9 @@ public class CommentService {
     CommentMapper commentMapper;
     CloudinaryService cloudinaryService;
 
-    private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsernameAndDeletedFalseAndLockedFalse(username)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-    }
-
-    private Book getActiveBook(UUID bookId) {
-        return bookRepository.findByIdAndDeletedFalse(bookId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
-    }
-
-    private String uploadThumbnailIfPresent(MultipartFile thumbnail) {
-        if (thumbnail != null && !thumbnail.isEmpty()) {
-            return cloudinaryService.uploadFile(thumbnail);
-        }
-        return null;
-    }
-
-    // Map comment sang response. Nếu comment bị xóa thì ẩn nội dung
-    private CommentResponse mapWithMaskedDeleted(Comment comment) {
-        CommentResponse response = commentMapper.toCommentResponse(comment);
-
-        if (Boolean.TRUE.equals(comment.getDeleted())) {
-            response.setContent("[Bình luận đã bị xóa]");
-            response.setThumbnail(null);
-            response.setUser(null);
-        }
-
-        // Xử lý đệ quy cho children
-        if (comment.getChildren() != null && !comment.getChildren().isEmpty()) {
-            List<CommentResponse> childResponses = comment.getChildren().stream()
-                    .filter(child -> !child.getDeleted() || !child.getChildren().isEmpty())
-                    .map(this::mapWithMaskedDeleted)
-                    .toList();
-            response.setChildren(childResponses);
-        }
-
-        return response;
-    }
-
-    // 1. CLIENT/ADMIN - Lấy danh sách bình luận của một quyển sách
+    /**
+     * 1. CLIENT/ADMIN - Get all comments of a book in a tree structure
+     */
     @Transactional(readOnly = true)
     public BookCommentResponse getCommentsByBookId(UUID bookId) {
         if (!bookRepository.existsById(bookId)) {
@@ -99,24 +61,26 @@ public class CommentService {
                 .build();
     }
 
-    // 2. CLIENT - [POST] /comments - Tạo bình luận mới hoặc trả lời bình luận
+    /**
+     * 2. CLIENT - Create a new comment for a book (or reply to an existing comment)
+     */
     @Transactional
     public CommentResponse createComment(CommentCreationRequest request, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();
         Book book = getActiveBook(request.getBookId());
 
-        // Kiểm tra user đã mua sản phẩm chưa
+        // Check if user has purchased the book
         if (!commentRepository.hasUserPurchasedBook(currentUser.getId(), book.getId())) {
             throw new AppException(ErrorCode.COMMENT_NOT_PURCHASED);
         }
 
-        // Xử lý parent comment (nếu là reply)
+        // Resolve parent comment (if is reply)
         Comment parentComment = null;
         if (request.getParentId() != null) {
             parentComment = commentRepository.findByIdAndDeletedFalse(request.getParentId())
                     .orElseThrow(() -> new AppException(ErrorCode.COMMENT_PARENT_NOT_FOUND));
 
-            // Đảm bảo parent comment thuộc cùng quyển sách
+            // Ensure parent comment belongs to the same book
             if (!parentComment.getBook().getId().equals(book.getId())) {
                 throw new AppException(ErrorCode.COMMENT_PARENT_BOOK_MISMATCH);
             }
@@ -137,7 +101,9 @@ public class CommentService {
         return commentMapper.toCommentResponse(savedComment);
     }
 
-    // 3. CLIENT - [DELETE] /comments/{commentId} - Xóa bình luận (chỉ xóa của chính mình)
+    /**
+     * 3. CLIENT - Delete own comment (soft delete)
+     */
     @Transactional
     public void deleteComment(UUID commentId) {
         Comment comment = commentRepository.findByIdAndUserId(commentId, getCurrentUser().getId())
@@ -147,7 +113,9 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    // 4. ADMIN - [POST] /admin/comments/{parentCommentId}/reply - Trả lời bình luận của khách hàng
+    /**
+     * 4. ADMIN - Admin reply to a comment of customer
+     */
     @Transactional
     public CommentResponse adminReplyComment(UUID parentCommentId, AdminReplyCommentRequest request, MultipartFile thumbnail) {
         User adminUser = getCurrentUser();
@@ -170,7 +138,9 @@ public class CommentService {
         return commentMapper.toCommentResponse(savedReply);
     }
 
-    // 5. ADMIN - [DELETE] /admin/comments/{commentId} - Xóa bình luận của khách hàng
+    /**
+     * 5. ADMIN - Delete a comment of customer (soft delete)
+     */
     @Transactional
     public void adminDeleteComment(UUID commentId) {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
@@ -178,6 +148,52 @@ public class CommentService {
 
         comment.setDeleted(true);
         commentRepository.save(comment);
+    }
+
+    // =========================================================================
+    // HELPERS
+    // =========================================================================
+
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsernameAndDeletedFalseAndLockedFalse(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    private Book getActiveBook(UUID bookId) {
+        return bookRepository.findByIdAndDeletedFalse(bookId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
+    }
+
+    private String uploadThumbnailIfPresent(MultipartFile thumbnail) {
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            return cloudinaryService.uploadFile(thumbnail);
+        }
+        return null;
+    }
+
+    /**
+     * Map the comment to a response object. Hide its content if it is deleted
+     */
+    private CommentResponse mapWithMaskedDeleted(Comment comment) {
+        CommentResponse response = commentMapper.toCommentResponse(comment);
+
+        if (Boolean.TRUE.equals(comment.getDeleted())) {
+            response.setContent("[Bình luận đã bị xóa]");
+            response.setThumbnail(null);
+            response.setUser(null);
+        }
+
+        // Resolve recursion for children
+        if (comment.getChildren() != null && !comment.getChildren().isEmpty()) {
+            List<CommentResponse> childResponses = comment.getChildren().stream()
+                    .filter(child -> !child.getDeleted() || !child.getChildren().isEmpty())
+                    .map(this::mapWithMaskedDeleted)
+                    .toList();
+            response.setChildren(childResponses);
+        }
+
+        return response;
     }
 
 }
