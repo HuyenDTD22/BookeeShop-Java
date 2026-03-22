@@ -14,18 +14,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-
-/*
- * Mỗi request vào server → nếu là API public thì cho qua → nếu không thì phải có JWT hợp lệ
- */
 
 @Configuration
-@EnableWebSecurity // Bật Spring Security cho toàn bộ ứng dụng
+@EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // Các API không cần đăng nhập
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             "/users/register",
             "/auth/login",
@@ -40,6 +34,12 @@ public class SecurityConfig {
             "/categories",
             "/ratings/books/**",
             "/comments/books/**",
+            "/orders/vnpay-return",
+    };
+
+    private static final String[] SWAGGER_ENDPOINTS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -51,8 +51,11 @@ public class SecurityConfig {
     // Luồng bảo mật - Mỗi request đi vào server → phải đi qua chuỗi bảo vệ này
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        // Các endpoint public → Cho phép truy cập mà không cần xác thực
-        httpSecurity.authorizeHttpRequests(request -> request
+        httpSecurity
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(request -> request
+                .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest()
@@ -73,18 +76,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter() {
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         corsConfiguration.addAllowedOrigin("http://localhost:3000");
-        corsConfiguration.addAllowedMethod("*"); // Cho phép tất cả các method
-        corsConfiguration.addAllowedHeader("*"); // Cho phép tất cả các header
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-        urlBasedCorsConfigurationSource.registerCorsConfiguration(
-                "/**", corsConfiguration); // Áp dụng cho tất cả các endpoint (đường dẫn)
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
 
-        return new CorsFilter(urlBasedCorsConfigurationSource);
+        return source;
     }
 
     // Customize(Tuỳ chỉnh)
@@ -99,7 +102,6 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-    // Do PasswordEncoder được sử dụng ở nhiều nơi nên init nó thành 1 cái Bean để dùng luôn
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
