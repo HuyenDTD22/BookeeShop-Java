@@ -58,8 +58,6 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
 
-        log.info("Lỗi tar về : " + exception);
-
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
 
         Map<String, Object> attributes = null;
@@ -81,6 +79,35 @@ public class GlobalExceptionHandler {
                         .message(Objects.nonNull(attributes)
                                 ? mapAttribute(errorCode.getMessage(), attributes)
                                 : errorCode.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ApiResponse> handlingDataIntegrityViolation(DataIntegrityViolationException exception) {
+        log.warn("DataIntegrityViolationException: {}", exception.getMessage());
+
+        String msg = exception.getMessage() != null ? exception.getMessage().toLowerCase() : "";
+
+        ErrorCode errorCode;
+
+        if (msg.contains("users") || msg.contains("username")) {
+            errorCode = ErrorCode.USER_EXISTED;
+        } else if (msg.contains("book")) {
+            errorCode = ErrorCode.BOOK_EXISTED;
+        } else if (msg.contains("categor")) {
+            errorCode = ErrorCode.CATEGORY_EXISTED;
+        } else if (msg.contains("role")) {
+            errorCode = ErrorCode.ROLE_EXISTED;
+        } else if (msg.contains("rating")) {
+            errorCode = ErrorCode.RATING_ALREADY_EXISTS;
+        } else {
+            errorCode = ErrorCode.USER_EXISTED;
+        }
+
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
                         .build());
     }
 
