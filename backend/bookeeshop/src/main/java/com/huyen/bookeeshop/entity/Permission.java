@@ -25,6 +25,9 @@ public class Permission {
     @Column(unique = true, nullable = false)
     String name;
 
+    @Column(name = "display_name")
+    String displayName;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
