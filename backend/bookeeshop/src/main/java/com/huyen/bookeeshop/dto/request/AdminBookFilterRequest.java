@@ -21,7 +21,7 @@ public class AdminBookFilterRequest {
     int page = 0;
 
     @Builder.Default
-    int size = 20;
+    int size = 10;
 
     String keyword;
 
