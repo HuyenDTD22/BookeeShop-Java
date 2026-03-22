@@ -59,7 +59,10 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     protected long refreshableDuration;
 
-    // 1. Hàm kiểm tra token có hợp lệ hay không
+    /**
+     * 1. CLIENT/ADMIN - Check valid token
+     */
+    @Transactional
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
 
@@ -74,7 +77,10 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-    // 2. Đăng nhập
+    /**
+     * 2. CLIENT/ADMIN - Login with username and password to get access token
+     */
+    @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository.findByUsernameAndDeletedFalseAndLockedFalse(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -89,7 +95,10 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
-    // 3. Đăng xuất
+    /**
+     * 3. CLIENT/ADMIN - Logout
+     */
+    @Transactional
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), true);
@@ -106,7 +115,10 @@ public class AuthenticationService {
         }
     }
 
-    // 4. Refresh token
+    /**
+     * 4. CLIENT/ADMIN - Refresh token
+     */
+    @Transactional
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(), true);
 
@@ -128,12 +140,19 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
+    // =========================================================================
+    // HELPERS
+    // =========================================================================
+
+    /**
+     * Verify token and return the SignedJWT if valid
+     */
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        // Kiểm tra xem token đã hết hạn chưa
+        // Check if token is expired
         Date expiryTime = (isRefresh)
                 ? new Date(signedJWT
                         .getJWTClaimsSet()
@@ -153,19 +172,22 @@ public class AuthenticationService {
         return signedJWT;
     }
 
+    /**
+     * Generate token for a user
+     */
     private String generateToken(User user) {
-        // header - Chứa nội dung thuật toán được sử dụng
+        // header - Contains the algorithm used
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
-        // payload - Chứa các nội dung được gửi đi trong token
+        // payload - Contains the data included in the token
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername()) // Đại diện cho user đăng nhập
-                .issuer("devteria.com") // Thường là tên domain - Dùng để định danh token do ai issue
-                .issueTime(new Date()) // Thời gian issue token
+                .subject(user.getUsername())  // Represents the authenticated user
+                .issuer("devteria.com")      // Usually the domain name – Used to identify who issued the token
+                .issueTime(new Date())      // Token issue time
                 .expirationTime(new Date(
                         Instant.now()
                                 .plus(validDuration, ChronoUnit.SECONDS)
-                                .toEpochMilli() // Thời gian hết hạn sau 1 tiếng
+                                .toEpochMilli() // Expiration time = issue time + valid duration
                         ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
@@ -173,7 +195,7 @@ public class AuthenticationService {
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 
-        // Tạo và signature token
+        // Create and signature token
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
@@ -185,6 +207,9 @@ public class AuthenticationService {
         }
     }
 
+    /**
+     * Build scope string for a user based on their roles and permissions
+     */
     public String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
 
