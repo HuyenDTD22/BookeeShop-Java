@@ -7,7 +7,6 @@ import javax.crypto.spec.SecretKeySpec;
 import com.huyen.bookeeshop.dto.request.IntrospectRequest;
 import com.huyen.bookeeshop.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
