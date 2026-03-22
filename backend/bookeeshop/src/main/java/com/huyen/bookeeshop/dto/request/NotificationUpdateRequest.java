@@ -1,12 +1,9 @@
 package com.huyen.bookeeshop.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.huyen.bookeeshop.enums.NotificationAudienceType;
 import com.huyen.bookeeshop.enums.NotificationType;
-import com.huyen.bookeeshop.validator.ValidNotificationAudience;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,33 +17,25 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@ValidNotificationAudience
-public class NotificationCreationRequest {
+public class NotificationUpdateRequest {
 
-    @NotBlank(message = "Title is required")
     @Size(max = 255, message = "Title must not exceed 255 characters")
     String title;
 
-    @NotBlank(message = "Content is required")
     String content;
 
-    @NotNull(message = "Notification type is required")
     NotificationType type;
 
-    @NotNull(message = "Audience type is required")
     NotificationAudienceType audienceType;
 
-    // Bắt buộc khi audienceType = BY_ROLE
     String targetRole;
 
-    // Bắt buộc khi audienceType = SPECIFIC_USERS
     List<UUID> targetUserIds;
 
-    // null = gửi ngay; non-null = lên lịch gửi theo giờ này
     @Future(message = "Scheduled time must be in the future")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime scheduledAt;
 
-    // true = lưu bản nháp (DRAFT), không gửi ngay
-    Boolean isDraft;
+    // true = xóa lịch gửi, chuyển về DRAFT
+    Boolean removeSchedule;
 }

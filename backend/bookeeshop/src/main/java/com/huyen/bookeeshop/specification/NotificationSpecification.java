@@ -25,7 +25,8 @@ public class NotificationSpecification {
             predicates.add(root.get("type").in(
                     NotificationType.PROMOTION,
                     NotificationType.ANNOUNCEMENT,
-                    NotificationType.SYSTEM
+                    NotificationType.SYSTEM,
+                    NotificationType.FLASH_SALE
             ));
 
             // Filter theo type

@@ -24,8 +24,8 @@ public class NotificationScheduler {
     NotificationService    notificationService;
 
     /**
-     * Chạy mỗi 60 giây.
-     * Poll DB tìm các thông báo SCHEDULED đến hoặc quá giờ scheduledAt → dispatch.
+     * Run each 60 seconds.
+     * Poll DB find notification SCHEDULED arrived or passed scheduledAt → dispatch.
      */
     @Scheduled(fixedDelay = 60_000)
     public void processScheduledNotifications() {

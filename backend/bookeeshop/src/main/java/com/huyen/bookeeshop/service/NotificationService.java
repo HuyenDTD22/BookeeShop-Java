@@ -1,8 +1,10 @@
 package com.huyen.bookeeshop.service;
 
+import com.huyen.bookeeshop.constant.PredefinedRole;
 import com.huyen.bookeeshop.dto.internal.AutoNotificationData;
 import com.huyen.bookeeshop.dto.request.NotificationCreationRequest;
 import com.huyen.bookeeshop.dto.request.NotificationFilterRequest;
+import com.huyen.bookeeshop.dto.request.NotificationUpdateRequest;
 import com.huyen.bookeeshop.dto.response.NotificationClientResponse;
 import com.huyen.bookeeshop.dto.response.NotificationReaderResponse;
 import com.huyen.bookeeshop.dto.response.NotificationResponse;
@@ -13,6 +15,7 @@ import com.huyen.bookeeshop.entity.User;
 import com.huyen.bookeeshop.entity.UserNotification;
 import com.huyen.bookeeshop.enums.NotificationAudienceType;
 import com.huyen.bookeeshop.enums.NotificationStatus;
+import com.huyen.bookeeshop.enums.NotificationType;
 import com.huyen.bookeeshop.exception.AppException;
 import com.huyen.bookeeshop.exception.ErrorCode;
 import com.huyen.bookeeshop.mapper.NotificationMapper;
@@ -52,7 +55,9 @@ public class NotificationService {
     // ADMIN APIs
     // =========================================================================
 
-    // 1. ADMIN - Lấy tất cả thông báo Admin tạo thủ công
+    /**
+     * 1. ADMIN - Get all notifications with filter and pagination.
+     */
     @Transactional(readOnly = true)
     public Page<NotificationResponse> adminGetAll(NotificationFilterRequest filter) {
         Sort sort = "oldest".equalsIgnoreCase(filter.getSortBy())
@@ -67,7 +72,9 @@ public class NotificationService {
                 .map(notificationMapper::toNotificationResponse);
     }
 
-    // 2. ADMIN - Lấy chi tiết 1 thông báo theo ID.
+    /**
+     * 2. ADMIN - Get details of a notification by ID
+     */
     @Transactional(readOnly = true)
     public NotificationResponse adminGetById(UUID notificationId) {
         Notification notification = notificationRepository
@@ -78,9 +85,9 @@ public class NotificationService {
     }
 
     /**
-     * 3. ADMIN - Tạo thông báo mới.
-     *  - Nếu scheduledAt == null  → dispatch ngay, status = SENT
-     *  - Nếu scheduledAt != null  → lưu với status = SCHEDULED, NotificationScheduler sẽ dispatch đúng giờ
+     * 3. ADMIN - Create a new notification
+     *  - if scheduledAt == null  → dispatch now, status = SENT
+     *  - if scheduledAt != null  → save with status = SCHEDULED
      */
     @Transactional
     public NotificationResponse adminCreate(NotificationCreationRequest request) {
@@ -96,16 +103,18 @@ public class NotificationService {
                 .createdBy(currentAdmin)
                 .build();
 
-        boolean isSendNow = request.getScheduledAt() == null;
+        boolean isDraftRequest = Boolean.TRUE.equals(request.getIsDraft());
+        boolean isSendNow      = !isDraftRequest && request.getScheduledAt() == null;
 
-        if (isSendNow) {
-            // Dispatch ngay
+        if (isDraftRequest) {
+            notification.setStatus(NotificationStatus.DRAFT);
+        } else if (isSendNow) {
             List<User> recipients = resolveRecipients(request);
             dispatchToUsers(notification, recipients);
             notification.setStatus(NotificationStatus.SENT);
             notification.setSentAt(LocalDateTime.now());
         } else {
-            // Lên lịch — Scheduler sẽ gọi dispatchScheduled() sau
+            // isScheduled
             notification.setStatus(NotificationStatus.SCHEDULED);
         }
 
@@ -115,7 +124,58 @@ public class NotificationService {
         return notificationMapper.toNotificationResponse(saved);
     }
 
-    // 4. ADMIN - Xoá mềm 1 thông báo (hỉ được xoá thông báo ở trạng thái DRAFT hoặc SCHEDULED)
+    /**
+     * 4. ADMIN - Update a notification (only allowed when status is DRAFT or SCHEDULED)
+       - if update scheduledAt: ensure status = SCHEDULED
+       - if remove scheduledAt: set status = DRAFT
+     */
+    @Transactional
+    public NotificationResponse adminUpdate(UUID notificationId, NotificationUpdateRequest request) {
+        Notification notification = notificationRepository
+                .findByIdAndDeletedFalse(notificationId)
+                .orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
+
+        // Chỉ cho sửa khi DRAFT hoặc SCHEDULED
+        if (notification.getStatus() == NotificationStatus.SENT
+                || notification.getStatus() == NotificationStatus.CANCELLED) {
+            throw new AppException(ErrorCode.NOTIFICATION_ALREADY_SENT);
+        }
+
+        // Cập nhật các field nếu có giá trị mới (null-safe)
+        if (request.getTitle() != null && !request.getTitle().isBlank()) {
+            notification.setTitle(request.getTitle());
+        }
+        if (request.getContent() != null && !request.getContent().isBlank()) {
+            notification.setContent(request.getContent());
+        }
+        if (request.getType() != null) {
+            notification.setType(request.getType());
+        }
+        if (request.getAudienceType() != null) {
+            notification.setAudienceType(request.getAudienceType());
+        }
+        if (request.getTargetRole() != null) {
+            notification.setTargetRole(request.getTargetRole());
+        }
+
+        // Xử lý scheduledAt
+        if (Boolean.TRUE.equals(request.getRemoveSchedule())) {
+            // Xóa lịch gửi → chuyển về DRAFT
+            notification.setScheduledAt(null);
+            notification.setStatus(NotificationStatus.DRAFT);
+        } else if (request.getScheduledAt() != null) {
+            // Cập nhật lịch gửi mới → đảm bảo status là SCHEDULED
+            notification.setScheduledAt(request.getScheduledAt());
+            notification.setStatus(NotificationStatus.SCHEDULED);
+        }
+
+        notification.setUpdatedAt(LocalDateTime.now());
+        return notificationMapper.toNotificationResponse(notificationRepository.save(notification));
+    }
+
+    /**
+     * 5. ADMIN - Delete a notification (soft delete, only allowed when status is DRAFT or SCHEDULED)
+     */
     @Transactional
     public void adminDelete(UUID notificationId) {
         Notification notification = notificationRepository
@@ -133,7 +193,9 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    // 5. ADMIN - Lấy danh sách user đã đọc 1 thông báo.
+    /**
+     * 6. ADMIN - Get list of users who have read a specific notification
+     */
     @Transactional(readOnly = true)
     public List<NotificationReaderResponse> adminGetReaders(UUID notificationId) {
         notificationRepository.findByIdAndDeletedFalse(notificationId)
@@ -146,7 +208,9 @@ public class NotificationService {
                 .toList();
     }
 
-    // 6. ADMIN - Huỷ 1 thông báo đã lên lịch trước khi đến giờ gửi.
+    /**
+     * 7. ADMIN - Cancel a notification (only allowed when status is DRAFT or SCHEDULED)
+     */
     @Transactional
     public NotificationResponse adminCancel(UUID notificationId) {
         Notification notification = notificationRepository
@@ -166,10 +230,12 @@ public class NotificationService {
     }
 
     // =========================================================================
-    // CLIENT APIs
+    // CLIENT and ADMIN APIs
     // =========================================================================
 
-    // 1. CLIENT - Lấy tất cả thông báo của user.
+    /**
+     * 1. CLIENT/ADMIN - Get all notifications of current user with filter and pagination.
+     */
     @Transactional(readOnly = true)
     public Page<NotificationClientResponse> clientGetMyNotifications(NotificationFilterRequest filter) {
         UUID userId = getCurrentUserId();
@@ -180,12 +246,16 @@ public class NotificationService {
 
         Pageable pageable = PageRequest.of(filter.getPage(), filter.getSize(), sort);
 
-        return userNotificationRepository.findByUserId(userId, pageable)
+        // Truyền type vào query (null = lấy tất cả)
+        NotificationType type = filter.getType();
+
+        return userNotificationRepository.findByUserIdAndType(userId, type, pageable)
                 .map(notificationMapper::toClientNotificationResponse);
     }
 
-    // 2. CLIENT - Lấy chi tiết 1 thông báo của user.
-    @Transactional(readOnly = true)
+    /**
+     * 2. CLIENT/ADMIN - Get details of a notification by ID (only if it belongs to current user)
+     */
     public NotificationClientResponse clientGetById(UUID notificationId) {
         UUID userId = getCurrentUserId();
 
@@ -196,7 +266,9 @@ public class NotificationService {
         return notificationMapper.toClientNotificationResponse(userNotification);
     }
 
-    // 3. CLIENT - Đánh dấu 1 thông báo là đã đọc.
+    /**
+     * 3. CLIENT/ADMIN - Mark a notification as read (only if it belongs to current user)
+     */
     @Transactional
     public NotificationClientResponse clientMarkAsRead(UUID notificationId) {
         UUID userId = getCurrentUserId();
@@ -214,14 +286,18 @@ public class NotificationService {
         return notificationMapper.toClientNotificationResponse(userNotification);
     }
 
-    // 4. CLIENT - Đánh dấu tất cả thông báo là đã đọc.
+    /**
+     * 4. CLIENT/ADMIN - Mark all notifications as read for current user
+     */
     @Transactional
     public void clientMarkAllAsRead() {
         UUID userId = getCurrentUserId();
         userNotificationRepository.markAllAsRead(userId);
     }
 
-    // 5. CLIENT - Lấy số lượng thông báo chưa đọc.
+    /**
+     * 5. CLIENT/ADMIN - Get count of unread notifications for current user
+     */
     @Transactional(readOnly = true)
     public UnreadCountResponse clientGetUnreadCount() {
         UUID userId = getCurrentUserId();
@@ -230,12 +306,11 @@ public class NotificationService {
     }
 
     // =========================================================================
-    // INTERNAL — dùng bởi OrderService và NotificationScheduler
+    // INTERNAL — use by OrderService và NotificationScheduler
     // =========================================================================
 
     /**
-     * Tạo và dispatch thông báo tự động từ hệ thống.
-     * Gọi từ OrderService khi: đặt hàng thành công / trạng thái đơn thay đổi.
+     * Send system notifications for order events.
      */
     @Transactional
     public void sendAutoNotification(AutoNotificationData data) {
@@ -269,8 +344,7 @@ public class NotificationService {
     }
 
     /**
-     * Dispatch 1 thông báo đã lên lịch đến danh sách người nhận.
-     * Gọi bởi NotificationScheduler khi đến giờ gửi.
+     * Send scheduled notification to recipients.
      */
     @Transactional
     public void dispatchScheduled(Notification notification) {
@@ -289,13 +363,25 @@ public class NotificationService {
     }
 
     // =========================================================================
-    // PRIVATE HELPERS
+    // HELPERS
     // =========================================================================
 
-    // Resolve danh sách người nhận từ NotificationCreateRequest (lúc tạo mới).
+    /**
+     * Resolve list of recipient users based on audienceType and related fields in the creation request.
+     */
     private List<User> resolveRecipients(NotificationCreationRequest request) {
         return switch (request.getAudienceType()) {
             case ALL -> userRepository.findAllByDeletedFalse();
+
+            case CUSTOMERS -> userRepository.findAllByDeletedFalse().stream()
+                    .filter(u -> u.getRoles().stream()
+                            .anyMatch(r -> PredefinedRole.USER_ROLE.getName().equals(r.getName())))
+                    .toList();
+
+            case STAFF -> userRepository.findAllByDeletedFalse().stream()
+                    .filter(u -> u.getRoles().stream()
+                            .anyMatch(r -> r.getName().startsWith("STAFF_")))
+                    .toList();
 
             case BY_ROLE -> userRepository.findAllByDeletedFalse().stream()
                     .filter(u -> u.getRoles().stream()
@@ -305,6 +391,7 @@ public class NotificationService {
 
             case SPECIFIC_USERS -> {
                 List<User> users = userRepository.findAllById(request.getTargetUserIds());
+
                 if (users.size() != request.getTargetUserIds().size()) {
                     throw new AppException(ErrorCode.USER_NOT_EXISTED);
                 }
@@ -313,7 +400,9 @@ public class NotificationService {
         };
     }
 
-    // Resolve danh sách người nhận từ Notification entity đã lưu (lúc scheduler chạy).
+    /**
+     * Resolve list of recipient users based on audienceType and related fields in the Notification entity
+     */
     private List<User> resolveRecipientsByNotification(Notification notification) {
         NotificationAudienceType audienceType = notification.getAudienceType();
 
@@ -323,6 +412,16 @@ public class NotificationService {
 
         return switch (audienceType) {
             case ALL -> userRepository.findAllByDeletedFalse();
+
+            case CUSTOMERS -> userRepository.findAllByDeletedFalse().stream()
+                    .filter(u -> u.getRoles().stream()
+                            .anyMatch(r -> PredefinedRole.USER_ROLE.getName().equals(r.getName())))
+                    .toList();
+
+            case STAFF -> userRepository.findAllByDeletedFalse().stream()
+                    .filter(u -> u.getRoles().stream()
+                            .anyMatch(r -> r.getName().startsWith("STAFF_")))
+                    .toList();
 
             case BY_ROLE -> userRepository.findAllByDeletedFalse().stream()
                     .filter(u -> u.getRoles().stream()
@@ -340,7 +439,9 @@ public class NotificationService {
         };
     }
 
-    // Tạo UserNotification cho mỗi recipient và gắn vào Notification trước khi lưu.
+    /**
+     * Create UserNotification for each recipient and match for Notification before saving.
+     */
     private void dispatchToUsers(Notification notification, List<User> recipients) {
         if (recipients.isEmpty()) {
             return;

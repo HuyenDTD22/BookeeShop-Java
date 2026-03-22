@@ -1,6 +1,7 @@
 package com.huyen.bookeeshop.repository;
 
 import com.huyen.bookeeshop.entity.UserNotification;
+import com.huyen.bookeeshop.enums.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,16 +21,6 @@ public interface UserNotificationRepository
 
     Optional<UserNotification> findByNotificationIdAndUserId(UUID notificationId, UUID userId);
 
-    // Lấy danh sách user_notifications của 1 user
-    @Query("""
-            SELECT un FROM UserNotification un
-            JOIN FETCH un.notification n
-            WHERE un.user.id = :userId
-              AND n.deleted = false
-            """)
-    Page<UserNotification> findByUserId(@Param("userId") UUID userId, Pageable pageable);
-
-    // Lấy danh sách user đã đọc 1 thông báo
     @Query("""
             SELECT un FROM UserNotification un
             JOIN FETCH un.user u
@@ -38,10 +29,8 @@ public interface UserNotificationRepository
             """)
     List<UserNotification> findReadUsersByNotificationId(@Param("notificationId") UUID notificationId);
 
-    // Đếm số thông báo chưa đọc của 1 user.
     long countByUserIdAndIsReadFalse(UUID userId);
 
-    // Đánh dấu tất cả thông báo chưa đọc của user là đã đọc
     @Modifying
     @Query("""
             UPDATE UserNotification un
@@ -51,4 +40,17 @@ public interface UserNotificationRepository
               AND un.isRead = false
             """)
     int markAllAsRead(@Param("userId") UUID userId);
+
+    @Query("""
+    SELECT un FROM UserNotification un
+    JOIN FETCH un.notification n
+    WHERE un.user.id = :userId
+      AND (:type IS NULL OR n.type = :type)
+    ORDER BY n.createdAt DESC
+""")
+    Page<UserNotification> findByUserIdAndType(
+            @Param("userId") UUID userId,
+            @Param("type") NotificationType type,
+            Pageable pageable
+    );
 }

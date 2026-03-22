@@ -14,7 +14,9 @@ public class NotificationAudienceValidator
         }
 
         boolean valid = switch (request.getAudienceType()) {
-            case ALL -> true;
+            case ALL,
+                 CUSTOMERS,
+                 STAFF      -> true;
 
             case BY_ROLE -> request.getTargetRole() != null
                     && !request.getTargetRole().isBlank();

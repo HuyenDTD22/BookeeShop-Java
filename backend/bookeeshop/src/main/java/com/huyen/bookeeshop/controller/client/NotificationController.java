@@ -5,6 +5,9 @@ import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.NotificationClientResponse;
 import com.huyen.bookeeshop.dto.response.UnreadCountResponse;
 import com.huyen.bookeeshop.service.NotificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Tag(name = "Notification", description = "Notification APIs for client")
 @Slf4j
 @RestController
 @RequestMapping("/notifications")
@@ -24,6 +28,8 @@ public class NotificationController {
 
     NotificationService notificationService;
 
+    @Operation(summary = "Get all notifications of user")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Page<NotificationClientResponse>> getMyNotifications(
@@ -34,6 +40,8 @@ public class NotificationController {
                 .build();
     }
 
+    @Operation(summary = "Get count of unread notifications of user")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/unread-count")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<UnreadCountResponse> getUnreadCount() {
@@ -42,6 +50,8 @@ public class NotificationController {
                 .build();
     }
 
+    @Operation(summary = "Get notification details by ID")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{notificationId}")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<NotificationClientResponse> getById(
@@ -52,6 +62,8 @@ public class NotificationController {
                 .build();
     }
 
+    @Operation(summary = "Mark a notification as read")
+    @SecurityRequirement(name = "bearerAuth")
     @PatchMapping("/{notificationId}/read")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<NotificationClientResponse> markAsRead(
@@ -63,6 +75,8 @@ public class NotificationController {
                 .build();
     }
 
+    @Operation(summary = "Mark all notifications as read")
+    @SecurityRequirement(name = "bearerAuth")
     @PatchMapping("/read-all")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> markAllAsRead() {

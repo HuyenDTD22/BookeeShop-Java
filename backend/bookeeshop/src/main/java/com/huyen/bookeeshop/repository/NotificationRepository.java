@@ -20,7 +20,6 @@ public interface NotificationRepository
 
     Optional<Notification> findByIdAndDeletedFalse(UUID id);
 
-    // Lấy các thông báo đã lên lịch và đến giờ gửi nhưng chưa gửi.
     @Query("""
             SELECT n FROM Notification n
             WHERE n.status = :status
@@ -30,6 +29,5 @@ public interface NotificationRepository
             """)
     List<Notification> findPendingScheduled(@Param("status") NotificationStatus status, @Param("now") LocalDateTime now);
 
-    // Kiểm tra xem đã có thông báo tự động cho order + type này chưa.
     boolean existsByRefIdAndTypeAndDeletedFalse(String refId, NotificationType type);
 }
