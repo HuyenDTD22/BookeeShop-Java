@@ -35,6 +35,85 @@ public class RatingService {
     UserRepository userRepository;
     RatingMapper ratingMapper;
 
+    /**
+     * 1. CLIENT/ADMIN - Get all ratings for a book
+     */
+    @Transactional(readOnly = true)
+    public BookRatingSummaryResponse getRatingsByBookId(UUID bookId) {
+        if (!bookRepository.existsByIdAndDeletedFalse(bookId)) {
+            throw new AppException(ErrorCode.BOOK_NOT_FOUND);
+        }
+
+        List<Rating> ratings = ratingRepository.findAllByBookIdAndDeletedFalse(bookId);
+
+        return buildSummary(ratings);
+    }
+
+    /**
+     * 2. CLIENT - Create a new rating for a book
+      * - User must have purchased the book to rate it
+      * - User can only rate a book once (no duplicates)
+     */
+    @Transactional
+    public RatingResponse createRating(RatingCreationRequest request) {
+        User currentUser = getCurrentUser();
+        Book book = getActiveBook(request.getBookId());
+
+        // Kiểm tra user đã từng mua sách chưa
+        if (!ratingRepository.hasUserPurchasedBook(currentUser.getId(), book.getId())) {
+            throw new AppException(ErrorCode.RATING_NOT_PURCHASED);
+        }
+
+        // Kiểm tra user đã rating quyển sách này chưa (mỗi user chỉ rating 1 lần)
+        if (ratingRepository.existsByUserIdAndBookId(currentUser.getId(), book.getId())) {
+            throw new AppException(ErrorCode.RATING_ALREADY_EXISTS);
+        }
+
+        Rating rating = Rating.builder()
+                .value(request.getValue())
+                .user(currentUser)
+                .book(book)
+                .build();
+
+        Rating savedRating = ratingRepository.save(rating);
+
+        return ratingMapper.toRatingResponse(savedRating);
+    }
+
+    /**
+     * 3. CLIENT - Update an existing rating
+     */
+    @Transactional
+    public RatingResponse updateRating(UUID ratingId, RatingUpdateRequest request) {
+        User currentUser = getCurrentUser();
+
+        Rating rating = ratingRepository.findByIdAndUserId(ratingId, currentUser.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.RATING_NOT_FOUND));
+
+        rating.setValue(request.getValue());
+        Rating updatedRating = ratingRepository.save(rating);
+
+        return ratingMapper.toRatingResponse(updatedRating);
+    }
+
+    /**
+     * 4. CLIENT - Delete a rating (soft delete)
+     */
+    @Transactional
+    public void deleteRating(UUID ratingId) {
+        User currentUser = getCurrentUser();
+
+        Rating rating = ratingRepository.findByIdAndUserId(ratingId, currentUser.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.RATING_NOT_FOUND));
+
+        rating.setDeleted(true);
+        ratingRepository.save(rating);
+    }
+
+    //==========================================================================
+    // HELPER
+    //==========================================================================
+
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsernameAndDeletedFalseAndLockedFalse(username)
@@ -46,7 +125,13 @@ public class RatingService {
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
     }
 
-    // Tính toán phân bổ số sao
+    /**
+     * Calculate rating summary for a book:
+     * - Total ratings
+     * - Count ratings by star (1–5)
+     * - Average rating (rounded to 1 decimal)
+     * - Map ratings to RatingResponse
+     */
     private BookRatingSummaryResponse buildSummary(List<Rating> ratings) {
         int total = ratings.size();
 
@@ -75,71 +160,6 @@ public class RatingService {
                 .fiveStar(fiveStar)
                 .ratings(ratingResponses)
                 .build();
-    }
-
-    // 1. CLIENT/ADMIN - Lấy tất cả đánh giá của sách
-    @Transactional(readOnly = true)
-    public BookRatingSummaryResponse getRatingsByBookId(UUID bookId) {
-        if (!bookRepository.existsByIdAndDeletedFalse(bookId)) {
-            throw new AppException(ErrorCode.BOOK_NOT_FOUND);
-        }
-
-        List<Rating> ratings = ratingRepository.findAllByBookIdAndDeletedFalse(bookId);
-
-        return buildSummary(ratings);
-    }
-
-    // 2. CLIENT - Tạo mới đánh giá
-    @Transactional
-    public RatingResponse createRating(RatingCreationRequest request) {
-        User currentUser = getCurrentUser();
-        Book book = getActiveBook(request.getBookId());
-
-        // Kiểm tra user đã từng mua sách chưa
-        if (!ratingRepository.hasUserPurchasedBook(currentUser.getId(), book.getId())) {
-            throw new AppException(ErrorCode.RATING_NOT_PURCHASED);
-        }
-
-        // Kiểm tra user đã rating quyển sách này chưa (mỗi user chỉ rating 1 lần)
-        if (ratingRepository.existsByUserIdAndBookId(currentUser.getId(), book.getId())) {
-            throw new AppException(ErrorCode.RATING_ALREADY_EXISTS);
-        }
-
-        Rating rating = Rating.builder()
-                .value(request.getValue())
-                .user(currentUser)
-                .book(book)
-                .build();
-
-        Rating savedRating = ratingRepository.save(rating);
-
-        return ratingMapper.toRatingResponse(savedRating);
-    }
-
-    // 3. CLIENT - Cập nhật đánh giá
-    @Transactional
-    public RatingResponse updateRating(UUID ratingId, RatingUpdateRequest request) {
-        User currentUser = getCurrentUser();
-
-        Rating rating = ratingRepository.findByIdAndUserId(ratingId, currentUser.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.RATING_NOT_FOUND));
-
-        rating.setValue(request.getValue());
-        Rating updatedRating = ratingRepository.save(rating);
-
-        return ratingMapper.toRatingResponse(updatedRating);
-    }
-
-    // 4. CLIENT - Xóa đánh giá (soft delete)
-    @Transactional
-    public void deleteRating(UUID ratingId) {
-        User currentUser = getCurrentUser();
-
-        Rating rating = ratingRepository.findByIdAndUserId(ratingId, currentUser.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.RATING_NOT_FOUND));
-
-        rating.setDeleted(true);
-        ratingRepository.save(rating);
     }
 
 }

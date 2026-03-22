@@ -14,5 +14,7 @@ public class RatingResponse {
 
     UUID id;
     Double value;
+    UUID userId;
+    String userUsername;
 
 }

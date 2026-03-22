@@ -6,6 +6,9 @@ import com.huyen.bookeeshop.dto.response.ApiResponse;
 import com.huyen.bookeeshop.dto.response.BookRatingSummaryResponse;
 import com.huyen.bookeeshop.dto.response.RatingResponse;
 import com.huyen.bookeeshop.service.RatingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Tag(name = "Rating", description = "Rating APIs for client")
 @RestController
 @RequestMapping("/ratings")
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class RatingController {
 
     RatingService ratingService;
 
+    @Operation(summary = "Get rating summary for a book")
     @GetMapping("/books/{bookId}")
     ApiResponse<BookRatingSummaryResponse> getRatingsByBookId(@PathVariable UUID bookId) {
         return ApiResponse.<BookRatingSummaryResponse>builder()
@@ -32,6 +37,8 @@ public class RatingController {
                 .build();
     }
 
+    @Operation(summary = "Create a new rating for a book")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ApiResponse<RatingResponse> createRating(@RequestBody @Valid RatingCreationRequest request) {
@@ -40,6 +47,8 @@ public class RatingController {
                 .build();
     }
 
+    @Operation(summary = "Update an existing rating")
+    @SecurityRequirement(name = "bearerAuth")
     @PatchMapping("/{ratingId}")
     ApiResponse<RatingResponse> updateRating(@PathVariable UUID ratingId, @RequestBody @Valid RatingUpdateRequest request) {
         return ApiResponse.<RatingResponse>builder()
@@ -47,6 +56,8 @@ public class RatingController {
                 .build();
     }
 
+    @Operation(summary = "Delete a rating")
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{ratingId}")
     ApiResponse<Void> deleteRating(@PathVariable UUID ratingId) {
         ratingService.deleteRating(ratingId);
