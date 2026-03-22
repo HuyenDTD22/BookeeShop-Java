@@ -24,7 +24,7 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${app.allowed-origins:http://localhost:3000}")
+    @Value("${app.default-admin.allowed-origins:http://localhost:3000}")
     private String allowedOriginsRaw;
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
