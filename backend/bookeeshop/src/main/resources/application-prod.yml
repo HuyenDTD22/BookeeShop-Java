@@ -20,6 +20,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
 
   mail:
     host: smtp.gmail.com
@@ -45,7 +46,7 @@ app:
   default-admin:
     username: ${ADMIN_USERNAME}
     password: ${ADMIN_PASSWORD}
-    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
+    allowed-origins: ${ALLOWED_ORIGINS}
 
 
 cloudinary:

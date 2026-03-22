@@ -16,4 +16,6 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "java -jar -Dspring.profiles.active=prod -Dserver.port=${PORT:-8080} app.jar"]
+ENV TZ=Asia/Ho_Chi_Minh
+
+ENTRYPOINT ["java","-jar","app.jar"]
