@@ -47,22 +47,36 @@ public class InitService {
 
     // 1. Sync Permissions
     private void syncPermissions() {
-        for(String permissionName : PredefinedPermission.getAllPermissions()) {
-            if(!permissionRepository.existsByName(permissionName)) {
-                Permission permission = Permission.builder()
-                        .name(permissionName)
-                        .build();
+        Map<String, String> displayNames = PredefinedPermission.DISPLAY_NAMES;
 
-                permissionRepository.save(permission);
-                log.info("Inserted permission: {}", permissionName);
-            }
+        for (String permissionName : PredefinedPermission.getAllPermissions()) {
+            String displayName = displayNames.getOrDefault(permissionName, permissionName);
+
+            permissionRepository.findByName(permissionName).ifPresentOrElse(
+                    existing -> {
+                        // Cập nhật displayName nếu chưa có (migration từ schema cũ không có field này)
+                        if (existing.getDisplayName() == null || existing.getDisplayName().isBlank()) {
+                            existing.setDisplayName(displayName);
+                            permissionRepository.save(existing);
+                            log.info("Updated displayName for permission: {}", permissionName);
+                        }
+                    },
+                    () -> {
+                        Permission permission = Permission.builder()
+                                .name(permissionName)
+                                .displayName(displayName)
+                                .build();
+                        permissionRepository.save(permission);
+                        log.info("Inserted permission: {} ({})", permissionName, displayName);
+                    }
+            );
         }
     }
 
     // 2. Sync Roles
     private void syncRoles() {
         for(PredefinedRole predefinedRole : PredefinedRole.values()) {
-            if(!roleRepository.existsByName(predefinedRole.getName())) {
+            if(!roleRepository.existsByNameAndDeletedFalse(predefinedRole.getName())) {
                 Role role = Role.builder()
                         .name(predefinedRole.getName())
                         .displayName(predefinedRole.getDisplayName())
