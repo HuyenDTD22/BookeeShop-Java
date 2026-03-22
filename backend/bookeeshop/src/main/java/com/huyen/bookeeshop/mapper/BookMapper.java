@@ -35,6 +35,13 @@ public interface BookMapper {
     @Mapping(target = "ratings", ignore = true)
     void updateBook(@MappingTarget Book book, BookUpdateRequest request);
 
+    @Mapping(target = "categoryId",   source = "category.id")
+    @Mapping(target = "categoryName", source = "category.name")
+    @Mapping(target = "inStock",      expression = "java(book.getStock() != null && book.getStock() > 0)")
+    @Mapping(target = "finalPrice",   expression = "java(calcFinalPrice(book.getPrice(), book.getDiscountPercentage()))")
+    @Mapping(target = "averageRating", ignore = true)
+    @Mapping(target = "totalRatings",  ignore = true)
+    @Mapping(target = "totalSold",     ignore = true)
     BookResponse toBookResponse(Book book);
 
     @Mapping(target = "categoryName", source = "category.name")
@@ -54,7 +61,7 @@ public interface BookMapper {
     @Mapping(target = "purchaseCount", ignore = true)
     BookDetailResponse toBookDetailResponse(Book book);
 
-    // Tính giá sau giảm
+    // Calc final price after applying discount
     default Double calcFinalPrice(Double price, Double discountPercentage) {
         if (price == null) return null;
         if (discountPercentage == null || discountPercentage <= 0) return price;

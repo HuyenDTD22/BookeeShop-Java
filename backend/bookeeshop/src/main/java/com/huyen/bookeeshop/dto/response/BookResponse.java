@@ -24,6 +24,8 @@ public class BookResponse {
 
     Double discountPercentage;
 
+    Double finalPrice;
+
     Integer stock;
 
     String author;
@@ -44,6 +46,18 @@ public class BookResponse {
 
     Boolean feature;
 
+    Boolean inStock;
+
     LocalDateTime createdAt;
+
+    UUID categoryId;
+
+    String categoryName;
+
+    Double averageRating;
+
+    Long totalRatings;
+
+    Long totalSold;
 
 }

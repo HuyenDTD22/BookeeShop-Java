@@ -2,7 +2,6 @@ package com.huyen.bookeeshop.specification;
 
 import com.huyen.bookeeshop.dto.request.BookFilterRequest;
 import com.huyen.bookeeshop.entity.Book;
-import com.huyen.bookeeshop.entity.OrderItem;
 import com.huyen.bookeeshop.entity.Rating;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -52,7 +51,6 @@ public class BookSpecification {
             // Lọc theo rating
             if (filter.getMinRating() != null || filter.getMaxRating() != null) {
                 Subquery<Double> ratingSubquery = query.subquery(Double.class);
-
                 Root<?> ratingRoot = ratingSubquery.from(Rating.class);
 
                 ratingSubquery.select(cb.avg(ratingRoot.get("value")))
@@ -71,67 +69,9 @@ public class BookSpecification {
                 }
             }
 
-            assert query != null;
-            query.distinct(true);
-
-            // Sort
-            applySorting(root, query, cb, filter);
+            if (query != null) query.distinct(true);
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-    }
-
-    private static void applySorting(Root<Book> root, CriteriaQuery<?> query,
-                                     CriteriaBuilder cb, BookFilterRequest filter) {
-        boolean isDesc = "desc".equalsIgnoreCase(filter.getSortDir());
-        String sortBy = filter.getSortBy() != null ? filter.getSortBy() : "createdAt";
-
-        Order order = switch (sortBy) {
-
-            case "rating" -> {
-                // Sort theo AVG rating (subquery)
-                Subquery<Double> sub = query.subquery(Double.class);
-
-                Root<?> rRoot = sub.from(Rating.class);
-
-                sub.select(cb.avg(rRoot.get("value")))
-                        .where(
-                                cb.equal(rRoot.get("book"), root),
-                                cb.isFalse(rRoot.get("deleted"))
-                        );
-
-                Expression<Double> avgExpr = cb.coalesce(sub, 0.0);
-
-                yield isDesc ? cb.desc(avgExpr) : cb.asc(avgExpr);
-            }
-
-            case "purchaseCount" -> {
-                // Sort theo tổng quantity trong order_items (subquery)
-                Subquery<Long> sub = query.subquery(Long.class);
-
-                Root<?> oiRoot = sub.from(OrderItem.class);
-
-                sub.select(cb.sumAsLong(oiRoot.get("quantity")))
-                        .where(cb.equal(oiRoot.get("book"), root));
-
-                Expression<Long> sumExpr = cb.coalesce(sub, 0L);
-
-                yield isDesc ? cb.desc(sumExpr) : cb.asc(sumExpr);
-            }
-
-            case "price" -> isDesc
-                    ? cb.desc(root.get("price"))
-                    : cb.asc(root.get("price"));
-
-            case "title" -> isDesc
-                    ? cb.desc(root.get("title"))
-                    : cb.asc(root.get("title"));
-
-            default -> isDesc
-                    ? cb.desc(root.get("createdAt"))
-                    : cb.asc(root.get("createdAt"));
-        };
-
-        query.orderBy(order);
     }
 }

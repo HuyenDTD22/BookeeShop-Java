@@ -1,8 +1,7 @@
 package com.huyen.bookeeshop.repository;
 
+import com.huyen.bookeeshop.dto.response.LowStockBookResponse;
 import com.huyen.bookeeshop.entity.Book;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,16 +20,14 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
 
     boolean existsByIdAndDeletedFalse(UUID id);
 
-    List<Book> findAllByDeletedFalse();
-
-    Page<Book> findAllByDeletedFalse(Pageable pageable);
-
-    Page<Book> findAllByFeatureTrueAndDeletedFalse(Pageable pageable);
-
-    @Query("SELECT b FROM Book b WHERE b.category.id IN :categoryIds AND b.deleted = false")
-    Page<Book> findAllByCategoryIdInAndDeletedFalse(@Param("categoryIds") List<UUID> categoryIds, Pageable pageable);
-
-    @Query("SELECT COALESCE(SUM(oi.quantity), 0) FROM OrderItem oi WHERE oi.book.id = :bookId")
+    @Query("""
+    SELECT COALESCE(SUM(oi.quantity), 0)
+    FROM OrderItem oi
+    JOIN oi.order o
+    WHERE oi.book.id = :bookId
+      AND o.status  = com.huyen.bookeeshop.enums.OrderStatus.COMPLETED
+      AND o.deleted = false
+    """)
     Long countPurchasesByBookId(@Param("bookId") UUID bookId);
 
     @Query("SELECT COALESCE(AVG(r.value), 0.0) FROM Rating r WHERE r.book.id = :bookId AND r.deleted = false")
@@ -38,12 +35,6 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
 
     @Query("SELECT COUNT(r) FROM Rating r WHERE r.book.id = :bookId AND r.deleted = false")
     Long countRatingsByBookId(@Param("bookId") UUID bookId);
-
-    @Query("""
-        SELECT c.id FROM Category c
-        WHERE c.parent.id = :parentId AND c.deleted = false
-    """)
-    List<UUID> findChildCategoryIds(@Param("parentId") UUID parentId);
 
     @Query(value = """
         WITH RECURSIVE category_tree AS (
@@ -56,4 +47,22 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
         SELECT id FROM category_tree
     """, nativeQuery = true)
     List<UUID> findAllDescendantCategoryIds(@Param("rootId") UUID rootId);
+
+    @Query("SELECT COUNT(b) FROM Book b WHERE b.deleted = false")
+    Long countTotalBooks();
+
+    @Query("SELECT COUNT(b) FROM Book b WHERE b.deleted = false AND b.stock <= :threshold AND b.stock > 0")
+    Long countLowStockBooks(@Param("threshold") int threshold);
+
+    @Query("""
+        SELECT new com.huyen.bookeeshop.dto.response.LowStockBookResponse(
+            b.id, b.title, b.thumbnail, b.stock
+        )
+        FROM Book b
+        WHERE b.deleted = false
+          AND b.stock  <= :threshold
+          AND b.stock   > 0
+        ORDER BY b.stock ASC
+    """)
+    List<LowStockBookResponse> findLowStockBooks(@Param("threshold") int threshold);
 }
