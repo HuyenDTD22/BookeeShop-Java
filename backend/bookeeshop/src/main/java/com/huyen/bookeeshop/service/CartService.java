@@ -38,24 +38,9 @@ public class CartService {
     UserRepository userRepository;
     CartMapper cartMapper;
 
-    private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsernameAndDeletedFalseAndLockedFalse(username)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-    }
-
-    private Cart getOrCreateCart(User user) {
-        return cartRepository.findByUsernameAndDeletedFalseAndLockedFalse(user.getUsername())
-                .orElseGet(() -> {
-                    Cart newCart = Cart.builder()
-                            .user(user)
-                            .cartItems(new ArrayList<>())
-                            .build();
-                    return cartRepository.save(newCart);
-                });
-    }
-
-    // 1. CLIENT - Thêm sản phẩm vào giỏ hàng
+    /**
+     * 1. CLIENT - Add item to cart
+     */
     @Transactional
     public CartItemResponse addToCart(AddToCartRequest request) {
         Cart cart = getOrCreateCart(getCurrentUser());
@@ -63,7 +48,7 @@ public class CartService {
         Book book = bookRepository.findById(request.getBookId())
                 .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
-        // Kiểm tra sách có bị xóa hoặc hết hàng không
+        // Check if book is deleted or out of stock
         if (book.getDeleted()) {
             throw new AppException(ErrorCode.BOOK_NOT_AVAILABLE);
         }
@@ -71,7 +56,7 @@ public class CartService {
             throw new AppException(ErrorCode.BOOK_OUT_OF_STOCK);
         }
 
-        // Nếu sách đã có trong giỏ hàng => cộng dồn số lượng
+        // If book already in cart => update quantity
         CartItem cartItem = cart.getCartItems().stream()
                 .filter(ci -> ci.getBook().getId().equals(book.getId()))
                 .findFirst()
@@ -80,14 +65,14 @@ public class CartService {
         if (cartItem != null) {
             int newQuantity = cartItem.getQuantity() + request.getQuantity();
 
-            // Kiểm tra số lượng mới không vượt quá tồn kho
+            // If new quantity exceeds stock
             if (newQuantity > book.getStock()) {
                 throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
             }
 
             cartItem.setQuantity(newQuantity);
         } else {
-            // Kiểm tra số lượng yêu cầu không vượt quá tồn kho
+            // Check if requested quantity exceeds stock
             if (request.getQuantity() > book.getStock()) {
                 throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
             }
@@ -106,16 +91,18 @@ public class CartService {
         return cartMapper.toCartItemResponse(savedCartItem);
     }
 
-    // 2. CLIENT - Cập nhật số lượng sản phẩm trong giỏ hàng
+    /**
+     * 2. CLIENT - Update quantity of item in cart
+     */
     @Transactional
     public CartItemResponse updateCartItem(UUID cartItemId, CartItemUpdateRequest request) {
-        // Kiểm tra cart item tồn tại và thuộc về user hiện tại
+        // Check if cart item exists and belongs to current user
         CartItem cartItem = cartItemRepository.findByIdAndUserId(cartItemId, getCurrentUser().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
 
         Book book = cartItem.getBook();
 
-        // Kiểm tra tồn kho
+        // Check stock
         if (request.getQuantity() > book.getStock()) {
             throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
         }
@@ -126,21 +113,49 @@ public class CartService {
         return cartMapper.toCartItemResponse(savedCartItem);
     }
 
-    // 3. CLIENT - Xem giỏ hàng của mình
+    /**
+     * 3. CLIENT - Get current user's cart
+     */
     @Transactional(readOnly = true)
     public CartResponse getMyCart() {
         Cart cart = getOrCreateCart(getCurrentUser());
         return cartMapper.toCartResponse(cart);
     }
 
-    // 4. CLIENT - Xóa sản phẩm khỏi giỏ hàng
+    /**
+     *  4. CLIENT - Delete item from cart
+     */
     @Transactional
     public void removeCartItem(UUID cartItemId) {
-        // Kiểm tra cart item tồn tại và thuộc về user hiện tại
+        // Check if cart item exists and belongs to current user
         CartItem cartItem = cartItemRepository.findByIdAndUserId(cartItemId, getCurrentUser().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
 
         cartItemRepository.delete(cartItem);
+    }
+
+    // =========================================================================
+    // HELPERS
+    // =========================================================================
+
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsernameAndDeletedFalseAndLockedFalse(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    /**
+     * Get current user's cart, if not exist => create new cart
+     */
+    private Cart getOrCreateCart(User user) {
+        return cartRepository.findByUsernameAndDeletedFalseAndLockedFalse(user.getUsername())
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder()
+                            .user(user)
+                            .cartItems(new ArrayList<>())
+                            .build();
+                    return cartRepository.save(newCart);
+                });
     }
 
 }
