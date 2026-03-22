@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,10 @@ public class CategoryService {
     CategoryMapper categoryMapper;
     CloudinaryService cloudinaryService;
 
-    // 1. ADMIN - Tạo mới 1 category
+    /**
+     * 1. ADMIN - Create a new category
+     */
+    @Transactional
     public CategoryResponse create(CategoryCreationRequest request, MultipartFile thumbnail) {
         var category = categoryMapper.toCategory(request);
 
@@ -53,7 +57,10 @@ public class CategoryService {
         return categoryMapper.toCategoryResponse(category);
     }
 
-    // 2. ADMIN - Cập nhật thông tin category
+    /**
+     * 2. ADMIN - Update information of a category
+     */
+    @Transactional
     public CategoryResponse update(UUID categoryId, CategoryUpdateRequest request, MultipartFile thumbnail)  {
         var category = categoryRepository.findByIdAndDeletedFalse(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -70,7 +77,7 @@ public class CategoryService {
             Category newParent = categoryRepository.findByIdAndDeletedFalse(request.getParentId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-            // Kiểm tra newParent không phải là con/cháu của category hiện tại
+            // Check newParent if is not child/grandchild of current category
             if (isDescendant(categoryId, newParent)) {
                 throw new AppException(ErrorCode.CATEGORY_CIRCULAR_REFERENCE);
             }
@@ -85,7 +92,10 @@ public class CategoryService {
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }
 
-    // 3. ADMIN/CLIENT - Lấy thông tin tất cả category theo cấu trúc cây
+    /**
+     * 3. ADMIN/CLIENT - Get all categories in tree structure
+     */
+    @Transactional(readOnly = true)
     public List<CategoryTreeResponse> getAll() {
         try {
             return categoryRepository.findRootCategories()
@@ -98,14 +108,20 @@ public class CategoryService {
         }
     }
 
-    // 4. ADMIN - Lấy thông tin category theo ID
+    /**
+     * 4. ADMIN - Get information of a category by ID
+     */
+    @Transactional(readOnly = true)
     public CategoryResponse getById(UUID categoryId) {
         return categoryRepository.findByIdAndDeletedFalse(categoryId)
                 .map(categoryMapper::toCategoryResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 
-    // 5. ADMIN - Xóa category (soft delete)
+    /**
+     * 5. ADMIN - Delete a category (soft delete)
+     */
+    @Transactional
     public void delete(UUID categoryId) {
         Category category = categoryRepository.findByIdAndDeletedFalse(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -124,10 +140,16 @@ public class CategoryService {
         categoryRepository.save(category);
     }
 
-    // Kiểm tra xem candidate có phải là con/cháu của targetId không
+    // =========================================================================
+    // HELPERS
+    // =========================================================================
+
+    /**
+     * Check if candidate is child/grandchild if targetId
+     */
     private boolean isDescendant(UUID targetId, Category candidate) {
         Category current = candidate;
-        int maxDepth = 20; // Giới hạn vòng lặp đề phòng data corrupt
+        int maxDepth = 20; // Limit the loop to prevent data corrupt
         int depth = 0;
 
         while (current != null && depth < maxDepth) {

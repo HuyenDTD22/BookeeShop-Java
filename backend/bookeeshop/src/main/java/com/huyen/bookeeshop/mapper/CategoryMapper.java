@@ -7,6 +7,9 @@ import com.huyen.bookeeshop.dto.response.CategoryTreeResponse;
 import com.huyen.bookeeshop.entity.Category;
 import org.mapstruct.*;
 
+import java.util.Collections;
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
@@ -35,6 +38,27 @@ public interface CategoryMapper {
     @Mapping(target = "parentName", source = "parent.name")
     CategoryResponse toCategoryResponse(Category category);
 
-    @Mapping(target = "children", source = "children")
-    CategoryTreeResponse toCategoryTreeResponse(Category category);
+    default CategoryTreeResponse toCategoryTreeResponse(Category category) {
+        if (category == null) return null;
+
+        // Lọc chỉ lấy children chưa bị xóa
+        List<Category> activeChildren = category.getChildren() == null
+                ? Collections.emptyList()
+                : category.getChildren().stream()
+                .filter(c -> !Boolean.TRUE.equals(c.getDeleted()))
+                .toList();
+
+        // Map đệ quy từng child
+        List<CategoryTreeResponse> childResponses = activeChildren.stream()
+                .map(this::toCategoryTreeResponse)
+                .toList();
+
+        return CategoryTreeResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .thumbnail(category.getThumbnail())
+                .description(category.getDescription())
+                .children(childResponses)
+                .build();
+    }
 }

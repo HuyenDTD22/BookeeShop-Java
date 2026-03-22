@@ -16,10 +16,6 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     Optional<Category> findByIdAndDeletedFalse(UUID id);
 
-    List<Category> findAllByDeletedFalse();
-
-    boolean existsByNameAndDeletedFalse(String name);
-
     @Query("SELECT c FROM Category c WHERE c.parent IS NULL AND c.deleted = false ORDER BY c.createdAt ASC")
     List<Category> findRootCategories();
 

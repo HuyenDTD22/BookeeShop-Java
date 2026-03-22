@@ -1,23 +1,21 @@
 package com.huyen.bookeeshop.controller.client;
 
-import com.huyen.bookeeshop.dto.request.CategoryCreationRequest;
-import com.huyen.bookeeshop.dto.request.CategoryUpdateRequest;
 import com.huyen.bookeeshop.dto.response.ApiResponse;
-import com.huyen.bookeeshop.dto.response.CategoryResponse;
 import com.huyen.bookeeshop.dto.response.CategoryTreeResponse;
 import com.huyen.bookeeshop.service.CategoryService;
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
+@Tag(name = "Category", description = "Category APIs for client")
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
@@ -27,6 +25,7 @@ public class CategoryController {
 
     CategoryService categoryService;
 
+    @Operation(summary = "Get all categories in tree structure")
     @GetMapping
     ApiResponse<List<CategoryTreeResponse>> getAll() {
         return ApiResponse.<List<CategoryTreeResponse>>builder()
