@@ -17,10 +17,12 @@ import com.huyen.bookeeshop.repository.CartItemRepository;
 import com.huyen.bookeeshop.repository.OrderRepository;
 import com.huyen.bookeeshop.repository.UserRepository;
 import com.huyen.bookeeshop.specification.OrderSpecification;
+import com.huyen.bookeeshop.util.OrderCodeGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +38,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderService {
@@ -51,7 +54,9 @@ public class OrderService {
     // ADMIN APIs
     //==========================================================================
 
-    // 1. ADMIN - Lấy tất cả orders (lọc, sắp xếp, phân trang, tìm kiếm)
+    /**
+     * 1. ADMIN - Get all orders with filter, pagination, sorting
+     */
     @Transactional(readOnly = true)
     public Page<OrderResponse> getAll(OrderFilterRequest filter) {
         Sort sort = "oldest".equalsIgnoreCase(filter.getSortBy())
@@ -66,7 +71,9 @@ public class OrderService {
                 .map(orderMapper::toOrderResponse);
     }
 
-    // 2. ADMIN - Lấy chi tiết order theo ID
+    /**
+     * 2. ADMIN - Get order details by ID
+     */
     @Transactional(readOnly = true)
     public OrderResponse getById(UUID orderId) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -75,7 +82,13 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    // 3. ADMIN - Cập nhật trạng thái đơn hàng
+    /**
+     * 3. ADMIN - Updates order status:
+     * - Valid flow: PENDING → CONFIRMED → SHIPPING → COMPLETED
+     * - Can CANCEL from any state except COMPLETED
+     * - If COMPLETED with COD → set payment status to PAID
+     * - Send notification on status change
+     */
     @Transactional
     public OrderResponse updateOrderStatus(UUID orderId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -95,7 +108,7 @@ public class OrderService {
 
         order.setStatus(newStatus);
 
-        // Nếu đơn hàng chuyển sang COMPLETED và phương thức thanh toán là COD thì tự động cập nhật trạng thái thanh toán thành PAID
+        // Nếu đơn hàng chuyển sang COMPLETED và payment_method là COD thì cập nhật payment_status thành PAID
         if (newStatus == OrderStatus.COMPLETED && order.getPaymentMethod() == PaymentMethod.COD) {
             order.setPaymentStatus(PaymentStatus.PAID);
             order.setPaidAt(LocalDateTime.now());
@@ -117,7 +130,9 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    // 4. ADMIN - Cập nhật trạng thái của nhiều đơn hàng
+    /**
+     * 4. ADMIN - Bulk update order status
+     */
     @Transactional
     public void bulkUpdateOrderStatus(BulkOrderStatusUpdateRequest request) {
         List<UUID> ids = request.getOrderIds();
@@ -155,7 +170,12 @@ public class OrderService {
 
     }
 
-    // 5. ADMIN - Chỉnh sửa thông tin 1 order
+    /**
+     * 5. ADMIN - Update order's information
+     * - Allowed only in PENDING or CONFIRMED
+     * - Validate stock and recalculate total if quantity changes
+     * - Not allowed in SHIPPING, CANCELLED, or COMPLETED
+     */
     @Transactional
     public OrderResponse update(UUID orderId, OrderUpdateRequest request) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -165,22 +185,57 @@ public class OrderService {
             throw new AppException(ErrorCode.ORDER_CANNOT_BE_MODIFIED);
         }
 
-        OrderStatus statusBefore = order.getStatus();
-
         orderMapper.updateOrder(order, request);
 
-        if (request.getStatus() != null
-                && request.getStatus() != statusBefore
-                && isValidTransition(statusBefore, request.getStatus())) {
-            order.setStatus(request.getStatus());
-        } else {
-            order.setStatus(statusBefore);
+        // Cập nhật số lượng từng item nếu có
+        if (request.getItems() != null && !request.getItems().isEmpty()) {
+            for (OrderItemUpdateRequest itemReq : request.getItems()) {
+                OrderItem item = order.getOrderItems().stream()
+                        .filter(i -> i.getId().equals(itemReq.getOrderItemId()))
+                        .findFirst()
+                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+                int oldQty = item.getQuantity();
+                int newQty = itemReq.getQuantity();
+                int diff   = newQty - oldQty;
+
+                // Kiểm tra tồn kho nếu tăng số lượng
+                if (diff > 0) {
+                    Book book = item.getBook();
+                    if (book.getStock() < diff) {
+                        throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+                    }
+                    book.setStock(book.getStock() - diff);
+                    bookRepository.save(book);
+                } else if (diff < 0) {
+                    // Hoàn kho nếu giảm số lượng
+                    Book book = item.getBook();
+                    book.setStock(book.getStock() + Math.abs(diff));
+                    bookRepository.save(book);
+                }
+
+                item.setQuantity(newQty);
+            }
+
+            // Tính lại totalAmount sau khi đổi quantity
+            double newTotal = order.getOrderItems().stream()
+                    .mapToDouble(item -> {
+                        double price = item.getDiscountPercentage() != null && item.getDiscountPercentage() > 0
+                                ? item.getPrice() * (1 - item.getDiscountPercentage() / 100)
+                                : item.getPrice();
+                        return price * item.getQuantity();
+                    })
+                    .sum();
+            order.setTotalAmount(newTotal);
         }
 
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    // 6. ADMIN - Xoá 1 order
+    /**
+     * 6. ADMIN - Delete an order (soft delete)
+     * - Allowed only in PENDING or CANCELLED
+     */
     @Transactional
     public void delete(UUID orderId) {
         Order order = orderRepository.findByIdAndDeletedFalse(orderId)
@@ -198,29 +253,13 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    // Các trạng thái đơn hàng không được phép chỉnh sửa thông tin đơn hàng nữa
-    private static final Set<OrderStatus> IMMUTABLE_STATUSES = Set.of(
-            OrderStatus.SHIPPING,
-            OrderStatus.CANCELLED,
-            OrderStatus.COMPLETED
-    );
-
-    // Quy tắc chuyển trạng thái đơn hàng hợp lệ: PENDING -> CONFIRMED -> DELIVERED -> COMPLETED
-    // Bất kỳ trạng thái nào cũng có thể chuyển sang CANCELLED trừ COMPLETED
-    private boolean isValidTransition(OrderStatus current, OrderStatus next) {
-        return switch (current) {
-            case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
-            case CONFIRMED -> next == OrderStatus.SHIPPING || next == OrderStatus.CANCELLED;
-            case SHIPPING -> next == OrderStatus.COMPLETED || next == OrderStatus.CANCELLED;
-            case CANCELLED, COMPLETED -> false;
-        };
-    }
-
     //==========================================================================
     // CLIENT APIs
     //==========================================================================
 
-    // 1. CLIENT - Lấy tất cả orders của chính mình
+    /**
+     * 1. CLIENT - Get all orders of user
+     */
     @Transactional(readOnly = true)
     public List<OrderResponse> getMyOrders() {
         List<Order> orders = orderRepository
@@ -231,7 +270,9 @@ public class OrderService {
                 .toList();
     }
 
-    // 2. CLIENT - Lấy chi tiết order của chính mình
+    /**
+     * 2. CLIENT - Get details of a specific order by ID for user
+     */
     @Transactional(readOnly = true)
     public OrderResponse getMyOrderById(UUID orderId) {
         Order order = orderRepository.findByIdAndUserIdAndDeletedFalse(orderId, getCurrentUserId())
@@ -240,7 +281,13 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    // 3. CLIENT - Tạo đơn hàng mới (từ Buy Now hoặc từ Cart)
+    /**
+     * 3. CLIENT - Create a new order:
+     * - Two flows: Buy Now (from book detail) or Buy from Cart
+     * - Validate stock for all items before creating order
+     * - For COD: create order, decrease stock immediately, send notification
+     * - For VNPay: create order, generate payment URL, wait for callback to confirm and decrease stock
+     */
     @Transactional
     public String createOrder(OrderCreationRequest request, HttpServletRequest httpRequest) {
         UUID userId = getCurrentUserId();
@@ -249,7 +296,6 @@ public class OrderService {
         boolean isBuyFromCart = request.getCartItemIds() != null
                 && !request.getCartItemIds().isEmpty();
 
-        // Phải có đúng 1 trong 2 luồng
         if (isBuyNow == isBuyFromCart) {
             throw new AppException(ErrorCode.INVALID_ORDER_SOURCE);
         }
@@ -298,39 +344,51 @@ public class OrderService {
         throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
     }
 
-    // 4. CLIENT - Xử lý callback từ VNPay sau khi khách thanh toán
+    /**
+     * 4. CLIENT - Handle VNPay return after payment
+     */
     @Transactional
-    public OrderResponse handleVNPayReturn(VNPayReturnRequest returnRequest) {
+    public boolean handleVNPayReturn(VNPayReturnRequest returnRequest) {
+
+        // 1. Xác thực chữ ký
         if (!vnPayService.verifySignature(returnRequest)) {
-            throw new AppException(ErrorCode.VNPAY_INVALID_SIGNATURE);
+            return false;
         }
 
-        UUID orderId = UUID.fromString(returnRequest.getVnpTxnRef());
-        Order order = orderRepository.findByIdAndDeletedFalse(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        // 2. Parse orderId
+        UUID orderId;
+        try {
+            orderId = UUID.fromString(returnRequest.getVnpTxnRef());
+        } catch (Exception e) {
+            return false;
+        }
 
-        // Tránh xử lý lại nếu callback được gọi nhiều lần
+        // 3. Tìm order
+        Order order = orderRepository.findByIdAndDeletedFalse(orderId).orElse(null);
+        if (order == null) {
+            return false;
+        }
+
+        // 4. Idempotent: đã PAID rồi → bỏ qua
         if (order.getPaymentStatus() == PaymentStatus.PAID) {
-            return orderMapper.toOrderResponse(order);
+            return true;
         }
 
         if ("00".equals(returnRequest.getVnpResponseCode())) {
+            // Thanh toán THÀNH CÔNG
             order.setPaymentStatus(PaymentStatus.PAID);
             order.setVnpayTransactionId(returnRequest.getVnpTransactionNo());
             order.setPaidAt(LocalDateTime.now());
+            orderRepository.save(order);
 
-            // Trừ kho sau khi VNPay xác nhận thành công
-            List<OrderItemData> itemDataList = order.getOrderItems().stream()
-                    .map(item -> OrderItemData.builder()
-                            .book(item.getBook())
-                            .quantity(item.getQuantity())
-                            .subtotal(0.0) // subtotal không cần dùng lại ở đây
-                            .build())
-                    .toList();
+            // Trừ kho
+            order.getOrderItems().forEach(item -> {
+                Book book = item.getBook();
+                book.setStock(book.getStock() - item.getQuantity());
+                bookRepository.save(book);
+            });
 
-            decreaseStock(itemDataList);
-
-            // Thông báo: đặt hàng + thanh toán VNPay thành công
+            // Thông báo
             notificationService.sendAutoNotification(
                     AutoNotificationData.builder()
                             .recipientUserId(order.getUser().getId())
@@ -338,21 +396,20 @@ public class OrderService {
                             .content(buildOrderPlacedContent(orderId.toString(), order.getTotalAmount()))
                             .type(NotificationType.ORDER_PLACED)
                             .refId(orderId.toString())
-                            .build()
-            );
+                            .build());
+            return true;
 
         } else {
-            // Thanh toán thất bại: xóa order tạm, không trừ kho
-            order.setDeleted(true);
-            order.setDeletedAt(LocalDateTime.now());
-            orderRepository.save(order);
-            throw new AppException(ErrorCode.VNPAY_PAYMENT_FAILED);
+            // Thanh toán THẤT BẠI → xóa order khỏi DB
+            orderRepository.delete(order);
+            return false;
         }
-
-        return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    // 5. CLIENT - Huỷ đơn hàng của chính mình
+    /**
+     * 5. CLIENT - Cancel owner's own order:
+     * - Allowed only in PENDING status
+     */
     @Transactional
     public OrderResponse cancelMyOrder(UUID orderId) {
         UUID userId = getCurrentUserId();
@@ -395,8 +452,31 @@ public class OrderService {
     }
 
     // =========================================================================
-    // PRIVATE HELPERS
+    // HELPERS
     // =========================================================================
+
+    /**
+     * Status not allowed to modify order info
+     */
+    private static final Set<OrderStatus> IMMUTABLE_STATUSES = Set.of(
+            OrderStatus.SHIPPING,
+            OrderStatus.CANCELLED,
+            OrderStatus.COMPLETED
+    );
+
+    /**
+     * Validate order status transition:
+     * - Flow: PENDING → CONFIRMED → SHIPPING → COMPLETED
+     * - Can CANCEL from any state except COMPLETED
+     */
+    private boolean isValidTransition(OrderStatus current, OrderStatus next) {
+        return switch (current) {
+            case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
+            case CONFIRMED -> next == OrderStatus.SHIPPING || next == OrderStatus.CANCELLED;
+            case SHIPPING -> next == OrderStatus.COMPLETED || next == OrderStatus.CANCELLED;
+            case CANCELLED, COMPLETED -> false;
+        };
+    }
 
     private UUID getCurrentUserId() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -405,6 +485,9 @@ public class OrderService {
                 .getId();
     }
 
+    /**
+     * Resolve order items for "Buy Now"
+     */
     private List<OrderItemData> resolveBuyNow(UUID bookId, Integer quantity) {
         if (quantity == null || quantity < 1) {
             throw new AppException(ErrorCode.QUANTITY_MUST_BE_POSITIVE);
@@ -432,6 +515,9 @@ public class OrderService {
                 .build());
     }
 
+    /**
+     * Resolve order items for "Buy from Cart"
+     */
     private List<OrderItemData> resolveBuyFromCart(List<UUID> cartItemIds, UUID userId) {
         List<CartItem> cartItems = cartItemRepository.findByIdsAndUserId(cartItemIds, userId);
 
@@ -463,6 +549,24 @@ public class OrderService {
         }).toList();
     }
 
+    /**
+     * Generate a unique order code
+     */
+    private String generateUniqueOrderCode() {
+        String code;
+        int maxRetries = 10;
+
+        do {
+            code = OrderCodeGenerator.generate();
+            maxRetries--;
+        } while (orderRepository.existsByOrderCode(code) && maxRetries > 0);
+
+        return code;
+    }
+
+    /**
+     * Build Order entity from request and resolved item data
+     */
     private Order buildOrder(OrderCreationRequest request,
                              List<OrderItemData> itemDataList,
                              UUID userId,
@@ -472,6 +576,7 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Order order = Order.builder()
+                .orderCode(generateUniqueOrderCode())
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
                 .address(request.getAddress())
@@ -499,6 +604,9 @@ public class OrderService {
         return order;
     }
 
+    /**
+     * Decrease stock for all books in the order items
+     */
     private void decreaseStock(List<OrderItemData> itemDataList) {
         itemDataList.forEach(data -> {
             Book book = data.getBook();
@@ -507,6 +615,9 @@ public class OrderService {
         });
     }
 
+    /**
+     * Calculate final price after discount for a book
+     */
     private double calculateFinalPrice(Book book) {
         Double discount = book.getDiscountPercentage();
         if (discount != null && discount > 0) {
@@ -519,6 +630,9 @@ public class OrderService {
     // Notification content builders
     // ============================================================================
 
+    /**
+     * Build notification content for order placed
+     */
     private String buildOrderPlacedContent(String orderId, Double totalAmount) {
         return String.format(
                 "Đơn hàng #%s của bạn đã được đặt thành công. " +
@@ -526,6 +640,9 @@ public class OrderService {
                 orderId, totalAmount);
     }
 
+    /**
+     * Build notification title based on order status
+     */
     private String buildOrderStatusTitle(OrderStatus status) {
         return switch (status) {
             case CONFIRMED -> "Đơn hàng đã được xác nhận";
@@ -536,6 +653,9 @@ public class OrderService {
         };
     }
 
+    /**
+     * Build notification content based on order status
+     */
     private String buildOrderStatusContent(String orderId, OrderStatus status) {
         return switch (status) {
             case CONFIRMED -> String.format(

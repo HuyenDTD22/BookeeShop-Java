@@ -25,6 +25,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     Optional<Order> findByIdAndUserIdAndDeletedFalse(UUID id, UUID userId);
 
+    boolean existsByOrderCode(String orderCode);
+
     @Modifying
     @Query("UPDATE Order o SET o.status = :status WHERE o.id IN :ids AND o.deleted = false")
     int bulkUpdateStatus(@Param("ids") List<UUID> ids, @Param("status") OrderStatus status);

@@ -1,11 +1,13 @@
 package com.huyen.bookeeshop.dto.request;
 
-import com.huyen.bookeeshop.enums.OrderStatus;
 import com.huyen.bookeeshop.enums.PaymentMethod;
 import com.huyen.bookeeshop.enums.PaymentStatus;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -20,7 +22,12 @@ public class OrderUpdateRequest {
 
     String address;
 
+    String note;
+
     PaymentMethod paymentMethod;
+
     PaymentStatus paymentStatus;
-    OrderStatus status;
+
+    @Valid
+    List<OrderItemUpdateRequest> items;
 }

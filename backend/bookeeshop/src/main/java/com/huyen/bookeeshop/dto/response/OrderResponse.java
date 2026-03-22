@@ -17,6 +17,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderResponse {
     UUID id;
+    String orderCode;
     String fullName;
     String phone;
     String address;

@@ -18,5 +18,6 @@ public class OrderItemResponse {
     Integer quantity;
     Double subtotal;
     UUID bookId;
-    String bookThumbnail;
+    String thumbnail;
+
 }

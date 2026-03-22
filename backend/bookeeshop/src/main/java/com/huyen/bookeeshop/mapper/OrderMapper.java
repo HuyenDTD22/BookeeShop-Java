@@ -16,7 +16,7 @@ public interface OrderMapper {
     OrderResponse toOrderResponse(Order order);
 
     @Mapping(source = "book.id", target = "bookId")
-    @Mapping(source = "book.thumbnail", target = "bookThumbnail")
+    @Mapping(source = "book.thumbnail", target = "thumbnail")
     @Mapping(target = "subtotal", expression = "java(calculateSubtotal(orderItem))")
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 

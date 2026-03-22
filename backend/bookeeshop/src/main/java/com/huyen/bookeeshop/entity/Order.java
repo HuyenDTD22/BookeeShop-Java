@@ -26,6 +26,9 @@ public class Order {
     @Column(updatable = false, nullable = false)
     UUID id;
 
+    @Column(name = "order_code", unique = true, nullable = false, updatable = false)
+    String orderCode;
+
     @Column(name = "full_name", nullable = false)
     String fullName;
 
