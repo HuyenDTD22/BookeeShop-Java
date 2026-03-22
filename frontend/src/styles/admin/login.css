@@ -1,0 +1,190 @@
+/* ══════════════════════════════════════════
+   Login Page — Light Blue & White Theme
+═══════════════════════════════════════════ */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    /* Nền gradient xanh nhạt đẹp */
+    background: linear-gradient(145deg, #e8f0fb 0%, #ddeaff 40%, #f0f6ff 100%);
+}
+
+/* Decoration circles */
+.login-bg-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 55% 45% at 15% 15%, rgba(26, 109, 196, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 55% at 85% 85%, rgba(46, 135, 232, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 0%, rgba(59, 158, 255, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Subtle dot grid */
+.login-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(26, 109, 196, 0.12) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 20%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 20%, transparent 100%);
+}
+
+/* Decorative blue blobs */
+.login-page::before {
+    content: '';
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26, 109, 196, 0.15), transparent 70%);
+    top: -80px;
+    left: -80px;
+    pointer-events: none;
+}
+
+.login-page::after {
+    content: '';
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(46, 135, 232, 0.12), transparent 70%);
+    bottom: -60px;
+    right: -60px;
+    pointer-events: none;
+}
+
+/* Card */
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border: 1px solid rgba(26, 109, 196, 0.15);
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow:
+        0 4px 6px rgba(15, 28, 53, 0.04),
+        0 20px 60px rgba(26, 109, 196, 0.12);
+    position: relative;
+    z-index: 1;
+}
+
+/* Blue accent bar top */
+.login-card-accent-bar {
+    position: absolute;
+    top: 0;
+    left: 32px;
+    right: 32px;
+    height: 4px;
+    background: linear-gradient(90deg, #1a6dc4, #2e87e8, #5ba3f5);
+    border-radius: 0 0 6px 6px;
+}
+
+/* Logo area */
+.login-logo-wrap {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-logo-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #1a6dc4, #2e87e8);
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 24px rgba(26, 109, 196, 0.3);
+}
+
+.login-title {
+    font-family: 'Merriweather', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #0f1c35;
+    margin-bottom: 4px;
+}
+
+.login-subtitle {
+    font-size: 0.8rem;
+    color: #8a9ab8;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Input icons */
+.login-input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8a9ab8;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+.login-pass-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #8a9ab8;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color var(--transition);
+}
+
+.login-pass-toggle:hover {
+    color: var(--accent);
+}
+
+/* Submit button */
+.login-submit-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    letter-spacing: 0.02em;
+}
+
+.login-submit-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+/* Footer */
+.login-footer-note {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #8a9ab8;
+    line-height: 1.6;
+}
+
+/* Input wrappers */
+.input-wrap {
+    position: relative;
+}
+
+.input-with-left-icon {
+    padding-left: 38px !important;
+}
+
+.input-with-both-icon {
+    padding-left: 38px !important;
+    padding-right: 42px !important;
+}

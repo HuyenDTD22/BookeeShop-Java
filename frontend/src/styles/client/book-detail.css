@@ -1,0 +1,1060 @@
+/* ══════════════════════════════════════════
+   BookeeShop — Book Detail (v4)
+═══════════════════════════════════════════ */
+
+.bd-page {
+    padding-top: 24px;
+    padding-bottom: 64px;
+}
+
+/* ── Breadcrumb ── */
+.bd-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--c-text-muted);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.bd-breadcrumb a {
+    color: var(--c-accent);
+    text-decoration: none;
+    transition: opacity 0.15s;
+}
+
+.bd-breadcrumb a:hover {
+    opacity: 0.75;
+}
+
+.bd-breadcrumb-current {
+    color: var(--c-text);
+    font-weight: 500;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Main grid: cột trái 44%, cột phải 1fr ── */
+.bd-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 44%) 1fr;
+    gap: 28px;
+    align-items: start;
+    margin-bottom: 24px;
+}
+
+/* ── Cột trái: sticky ── */
+.bd-cover-col {
+    position: sticky;
+    top: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Fix #1: cover wrap không padding nhiều, ảnh kéo dài */
+.bd-cover-wrap {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: 12px 12px 0;
+    /* bottom = 0 để ảnh chạm đáy */
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.bd-cover-img {
+    width: 100%;
+    max-height: 560px;
+    /* Fix #1: kéo dài hơn */
+    object-fit: cover;
+    /* cover thay vì contain → to hơn, chiếm hết chiều rộng */
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    display: block;
+}
+
+.bd-cover-placeholder {
+    width: 100%;
+    height: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: var(--c-text-muted);
+}
+
+.bd-discount-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--c-danger);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 99px;
+    z-index: 1;
+}
+
+/* Nút mua — 2 cột trên 1 hàng */
+.bd-action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.bd-btn-cart {
+    padding: 12px 8px;
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+    border: 1.5px solid var(--c-accent);
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.bd-btn-cart:hover:not(:disabled) {
+    background: var(--c-accent);
+    color: #fff;
+}
+
+.bd-btn-cart:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bd-btn-buy {
+    padding: 12px 8px;
+    background: var(--c-danger);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.bd-btn-buy:hover:not(:disabled) {
+    background: #dc2626;
+}
+
+.bd-btn-buy:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Policy — dùng .bd-card nên màu nền tự đồng bộ */
+.bd-policy-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.81rem;
+    color: var(--c-text-2);
+}
+
+/* ── Cột phải ── */
+.bd-info-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* gap do margin-bottom của từng .bd-card */
+}
+
+/* Fix #2: tiêu đề bên trong .bd-card */
+.bd-title {
+    font-family: 'Merriweather', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--c-text);
+    line-height: 1.35;
+    margin-bottom: 14px;
+    margin-top: 0;
+}
+
+.bd-rating-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.bd-rating-avg {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #b45309;
+}
+
+.bd-rating-count,
+.bd-sold-count {
+    font-size: 0.8rem;
+    color: var(--c-text-muted);
+}
+
+.bd-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.bd-final-price {
+    font-family: 'Merriweather', serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--c-danger);
+}
+
+.bd-original-price {
+    font-size: 1rem;
+    color: var(--c-text-muted);
+    text-decoration: line-through;
+}
+
+.bd-badge-success {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 99px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.bd-badge-danger {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 99px;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--c-danger);
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Fix #3: thông tin chi tiết dùng .bd-card — không cần style riêng nữa */
+.bd-detail-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-bottom: 1px solid var(--c-border);
+    color: var(--c-text);
+    /* background sẽ kế thừa từ .bd-card = #fff */
+    margin: 0;
+}
+
+.bd-info-row {
+    display: flex;
+    padding: 9px 20px;
+    border-bottom: 1px solid var(--c-border-subtle, #f0f4fa);
+    font-size: 0.875rem;
+    gap: 12px;
+}
+
+.bd-info-row:last-child {
+    border-bottom: none;
+}
+
+.bd-info-label {
+    width: 140px;
+    flex-shrink: 0;
+    color: var(--c-text-muted);
+}
+
+.bd-info-value {
+    color: var(--c-text);
+    font-weight: 500;
+}
+
+/* ── Fix #3: Section card — màu nền trắng đồng nhất ── */
+.bd-card {
+    background: #fff;
+    /* tất cả card đều trắng */
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.bd-section-title {
+    font-family: 'Merriweather', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--c-border);
+}
+
+/* Fix #4: mô tả — collapsed / expanded */
+.bd-desc-content {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: var(--c-text-2);
+}
+
+.bd-desc-content:not(.expanded) {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.bd-desc-content.expanded {
+    /* hiện toàn bộ */
+}
+
+.bd-desc-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 12px;
+    background: none;
+    border: none;
+    color: var(--c-accent);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.15s;
+}
+
+.bd-desc-toggle:hover {
+    opacity: 0.75;
+}
+
+/* ── Rating compact ── */
+.bd-rating-compact {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    max-width: 52%;
+}
+
+.bd-rating-big {
+    text-align: center;
+    padding: 20px 16px;
+    background: #fff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-border);
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+.bd-rating-number {
+    font-family: 'Merriweather', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--c-text);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.bd-rating-total {
+    font-size: 0.78rem;
+    color: var(--c-text-muted);
+    margin-top: 6px;
+}
+
+.bd-rating-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+}
+
+.bd-rating-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+}
+
+.bd-rating-bar-label {
+    width: 34px;
+    text-align: right;
+    color: var(--c-text-muted);
+    flex-shrink: 0;
+}
+
+.bd-rating-bar-track {
+    flex: 1;
+    height: 9px;
+    background: var(--c-raised);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--c-border);
+}
+
+.bd-rating-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b, #fcd34d);
+    border-radius: 99px;
+    transition: width 0.6s ease;
+}
+
+.bd-rating-bar-count {
+    width: 24px;
+    text-align: right;
+    color: var(--c-text-muted);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* ── Common buttons ── */
+.bd-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: var(--c-accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.bd-btn-primary:hover:not(:disabled) {
+    background: var(--c-accent-dim, #155aa0);
+}
+
+.bd-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.bd-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    background: transparent;
+    color: var(--c-text-2);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bd-btn-secondary:hover {
+    border-color: var(--c-accent);
+    color: var(--c-accent);
+}
+
+/* ── Comments ── */
+.bd-comment-login-prompt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--c-raised);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--c-text-2);
+    margin-bottom: 20px;
+}
+
+.bd-comment-login-prompt a {
+    color: var(--c-accent);
+    font-weight: 600;
+}
+
+/* ── Facebook-style form ── */
+.bd-fb-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.bd-fb-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c-accent), #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.bd-fb-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bd-fb-input-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.bd-fb-input-box {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    background: var(--c-raised, #f0f4fa);
+    border: 1.5px solid var(--c-border);
+    border-radius: 22px;
+    padding: 8px 8px 8px 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.bd-fb-input-box:focus-within {
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 3px rgba(26, 109, 196, 0.1);
+    background: #fff;
+}
+
+.bd-fb-textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--c-text);
+    resize: none;
+    overflow: hidden;
+    min-height: 20px;
+    max-height: 200px;
+    line-height: 1.5;
+    padding: 2px 0;
+}
+
+.bd-fb-textarea::placeholder {
+    color: var(--c-text-muted);
+}
+
+.bd-fb-input-icons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    padding-bottom: 2px;
+}
+
+.bd-fb-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c-text-muted);
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.bd-fb-icon-btn:hover,
+.bd-fb-icon-btn.active {
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+}
+
+.bd-fb-send-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c-text-muted);
+    opacity: 0.45;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.bd-fb-send-btn.active {
+    cursor: pointer;
+    opacity: 1;
+    color: var(--c-accent);
+    background: var(--c-accent-bg);
+}
+
+.bd-fb-send-btn.active:hover {
+    background: var(--c-accent);
+    color: #fff;
+}
+
+.bd-fb-img-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 8px;
+    margin-left: 4px;
+}
+
+.bd-fb-img-preview img {
+    max-width: 180px;
+    max-height: 130px;
+    border-radius: 8px;
+    border: 1px solid var(--c-border);
+    display: block;
+}
+
+.bd-fb-hint {
+    font-size: 0.72rem;
+    color: var(--c-text-muted);
+    margin: 4px 4px 0;
+    line-height: 1.5;
+}
+
+.bd-fb-hint kbd {
+    background: var(--c-raised);
+    border: 1px solid var(--c-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 0.68rem;
+    font-family: monospace;
+    color: var(--c-text-2);
+}
+
+.bd-fb-cancel-link {
+    background: none;
+    border: none;
+    color: var(--c-accent);
+    cursor: pointer;
+    padding: 0;
+    font-size: inherit;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+/* ── Emoji Picker ── */
+.bd-emoji-picker {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: 300px;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 1010;
+    overflow: hidden;
+    animation: fadeInUp 0.15s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(6px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+
+.bd-emoji-tabs {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--c-border);
+    padding: 0 4px;
+    gap: 2px;
+}
+
+.bd-emoji-tab {
+    flex: 1;
+    padding: 8px 4px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 0.72rem;
+    color: var(--c-text-muted);
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.bd-emoji-tab:hover {
+    color: var(--c-accent);
+}
+
+.bd-emoji-tab.active {
+    color: var(--c-accent);
+    border-bottom-color: var(--c-accent);
+    font-weight: 600;
+}
+
+.bd-emoji-close {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c-text-muted);
+    flex-shrink: 0;
+    transition: all 0.15s;
+    margin-left: 4px;
+}
+
+.bd-emoji-close:hover {
+    background: var(--c-raised);
+}
+
+.bd-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 2px;
+    padding: 8px;
+    max-height: 156px;
+    overflow-y: auto;
+}
+
+.bd-emoji-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+    line-height: 1;
+}
+
+.bd-emoji-btn:hover {
+    background: var(--c-raised);
+}
+
+/* ── Comment items ── */
+
+/* Fix #1: tất cả depth dùng cùng 1 class, cùng màu nền var(--c-raised) */
+.bd-comment-item {
+    padding: 12px 14px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    background: var(--c-raised);
+    /* xám xám đồng nhất */
+    transition: border-color 0.15s;
+    /* Fix #3: không có min-height, co giãn theo nội dung */
+    display: inline-block;
+    /* shrink-wrap theo text */
+    width: 100%;
+    /* nhưng vẫn full width */
+    box-sizing: border-box;
+}
+
+.bd-comment-item:hover {
+    border-color: rgba(26, 109, 196, 0.25);
+}
+
+/* bd-reply-item không còn dùng nữa — đã hợp nhất vào bd-comment-item */
+
+.bd-comment-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.bd-comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c-accent), #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.bd-comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bd-comment-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--c-text);
+}
+
+.bd-replying-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px 2px 6px;
+    border-radius: 99px;
+    border: 1px solid rgba(26, 109, 196, 0.2);
+    white-space: nowrap;
+}
+
+.bd-comment-time {
+    font-size: 0.72rem;
+    color: var(--c-text-muted);
+    display: block;
+    margin-top: 2px;
+}
+
+.bd-comment-del-btn {
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--c-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.bd-comment-del-btn:hover {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: var(--c-danger);
+}
+
+/* Fix #3: nội dung không padding dư, khung vừa với chữ */
+.bd-comment-content {
+    font-size: 0.875rem;
+    color: var(--c-text-2);
+    line-height: 1.55;
+    margin: 0 0 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.bd-comment-deleted {
+    font-size: 0.82rem;
+    color: var(--c-text-muted);
+    font-style: italic;
+    margin: 0 0 8px;
+}
+
+/* Fix #2: ảnh tách ra ngoài khung, render bên dưới */
+.bd-comment-img-outside {
+    margin-top: 6px;
+    margin-left: 4px;
+    /* lùi vào 1 chút để align với text */
+}
+
+.bd-comment-img-outside img {
+    max-width: 240px;
+    max-height: 200px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--c-border);
+    display: block;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.bd-comment-img-outside img:hover {
+    opacity: 0.9;
+}
+
+.bd-reply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    font-size: 0.78rem;
+    color: var(--c-accent);
+    cursor: pointer;
+    padding: 0;
+    font-weight: 600;
+    transition: opacity 0.15s;
+}
+
+.bd-reply-btn:hover {
+    opacity: 0.75;
+}
+
+/* padding-left được set inline bằng JS (indent theo depth) */
+.bd-comment-children {
+    margin-top: 8px;
+}
+
+.bd-toggle-children {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    font-size: 0.78rem;
+    color: var(--c-accent);
+    cursor: pointer;
+    padding: 0;
+    font-weight: 600;
+    margin-bottom: 8px;
+    transition: opacity 0.15s;
+}
+
+.bd-toggle-children:hover {
+    opacity: 0.75;
+}
+
+.bd-img-remove {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--c-danger);
+    color: #fff;
+    border: 2px solid #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.bd-empty-comments {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--c-text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.bd-empty-comments p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.bd-rating-error {
+    color: var(--c-danger);
+    font-size: 0.8rem;
+}
+
+.bd-rating-success {
+    color: #10b981;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* ── Loading / Error ── */
+.bd-loading-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 44%) 1fr;
+    gap: 28px;
+    padding: 32px 0;
+}
+
+.bd-skeleton {
+    background: linear-gradient(90deg, #f0f4fa 25%, #e8eef6 50%, #f0f4fa 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+}
+
+.bd-skeleton-cover {
+    height: 500px;
+    border-radius: 12px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0
+    }
+
+    100% {
+        background-position: 200% 0
+    }
+}
+
+.bd-error-wrap {
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--c-text-2);
+}
+
+.bd-spinner-sm {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(26, 109, 196, 0.25);
+    border-top-color: var(--c-accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+
+    .bd-main-grid,
+    .bd-loading-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    .bd-cover-col {
+        position: static;
+    }
+
+    .bd-rating-compact {
+        max-width: 100%;
+    }
+}

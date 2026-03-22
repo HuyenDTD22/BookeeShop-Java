@@ -1,0 +1,161 @@
+/* ══════════════════════════════════════════
+   Role Management — CSS
+═══════════════════════════════════════════ */
+
+/* ── Role Grid ── */
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+}
+
+/* ── Role Card ── */
+.role-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.role-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.role-card:hover {
+    border-color: rgba(26, 109, 196, 0.35);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.role-card:hover::before {
+    opacity: 1;
+}
+
+/* Card skeleton */
+.role-card-skeleton {
+    height: 210px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* Card Header */
+.role-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.role-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--accent-bg);
+    border: 1px solid rgba(26, 109, 196, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.role-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Merriweather', serif;
+    line-height: 1.3;
+}
+
+.role-card-name {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: monospace;
+    margin-top: 3px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border-subtle);
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Stats */
+.role-card-stats {
+    display: flex;
+    gap: 16px;
+}
+
+.role-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.role-stat-item svg {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+/* Permissions preview */
+.role-permissions-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 28px;
+}
+
+.perm-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-family: monospace;
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.perm-chip-more {
+    background: var(--accent-bg);
+    border-color: rgba(26, 109, 196, 0.2);
+    color: var(--accent);
+}
+
+/* Card Actions */
+.role-card-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .role-grid {
+        grid-template-columns: 1fr;
+    }
+}

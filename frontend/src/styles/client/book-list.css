@@ -1,0 +1,183 @@
+/* ══════════════════════════════════════════
+   BookeeShop — Book List Page CSS
+   (Featured / Newest / Category / All)
+═══════════════════════════════════════════ */
+
+.bl-page {
+    padding-top: 28px;
+    padding-bottom: 64px;
+}
+
+/* ── Breadcrumb ── */
+.bl-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--c-text-muted);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.bl-breadcrumb a {
+    color: var(--c-accent);
+    text-decoration: none;
+    transition: opacity 0.15s;
+}
+
+.bl-breadcrumb a:hover {
+    opacity: 0.75;
+}
+
+.bl-breadcrumb span {
+    color: var(--c-text-muted);
+}
+
+.bl-breadcrumb-current {
+    color: var(--c-text);
+    font-weight: 500;
+}
+
+/* ── Page header ── */
+.bl-page-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.bl-cat-thumb {
+    width: 64px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--c-border);
+    flex-shrink: 0;
+}
+
+.bl-page-title {
+    font-family: 'Merriweather', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--c-text);
+    margin: 0 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bl-page-sub {
+    font-size: 0.875rem;
+    color: var(--c-text-2);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.bl-total-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 99px;
+    border: 1px solid rgba(26, 109, 196, 0.2);
+}
+
+/* ── Book grid ── */
+.bl-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 1200px) {
+    .bl-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .bl-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .bl-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ── Skeleton ── */
+.bl-skeleton-card {
+    aspect-ratio: 3/4.5;
+    background: linear-gradient(90deg, #f0f4fa 25%, #e8eef6 50%, #f0f4fa 75%);
+    background-size: 200% 100%;
+    animation: bl-shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-border);
+}
+
+@keyframes bl-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ── Empty / Error ── */
+.bl-empty,
+.bl-error {
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    color: var(--c-text-2);
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+}
+
+.bl-empty-icon {
+    font-size: 2.8rem;
+}
+
+.bl-empty p,
+.bl-error p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--c-text-muted);
+}
+
+.bl-retry-btn {
+    padding: 8px 20px;
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+    border: 1.5px solid var(--c-accent);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bl-retry-btn:hover {
+    background: var(--c-accent);
+    color: #fff;
+}

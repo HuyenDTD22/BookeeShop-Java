@@ -1,0 +1,610 @@
+/* ══════════════════════════════════════════
+   BookeeShop — Profile Page CSS
+═══════════════════════════════════════════ */
+
+.pf-page {
+    padding-top: 32px;
+    padding-bottom: 64px;
+}
+
+/* ── Toast ── */
+.pf-toast {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #059669;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    min-width: 260px;
+    animation: pf-slide-in 0.25s ease;
+}
+
+.pf-toast.error {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: var(--c-danger);
+}
+
+@keyframes pf-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ── Page header ── */
+.pf-page-header {
+    margin-bottom: 28px;
+}
+
+.pf-page-title {
+    font-family: 'Merriweather', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 4px;
+}
+
+.pf-page-sub {
+    font-size: 0.875rem;
+    color: var(--c-text-muted);
+}
+
+/* ── Layout ── */
+.pf-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ── Sidebar: avatar card ── */
+.pf-sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.pf-avatar-card {
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: 28px 20px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.pf-avatar-wrap {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 16px;
+}
+
+.pf-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--c-border);
+    display: block;
+}
+
+.pf-avatar-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c-accent), #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    border: 3px solid var(--c-border);
+}
+
+.pf-avatar-edit-btn {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    color: #fff;
+    border: 2.5px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.pf-avatar-edit-btn:hover {
+    background: var(--c-accent-dim, #155aa0);
+}
+
+.pf-avatar-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--c-text);
+    margin-bottom: 3px;
+    word-break: break-word;
+}
+
+.pf-avatar-username {
+    font-size: 0.8rem;
+    color: var(--c-text-muted);
+    margin-bottom: 16px;
+}
+
+.pf-quick-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: var(--c-raised);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-border);
+}
+
+.pf-quick-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 0.8rem;
+    color: var(--c-text-2);
+}
+
+.pf-quick-row svg {
+    color: var(--c-accent);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.pf-member-since {
+    font-size: 0.72rem;
+    color: var(--c-text-muted);
+    padding-top: 12px;
+    border-top: 1px solid var(--c-border);
+}
+
+/* ── Main content ── */
+.pf-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ── Tabs ── */
+.pf-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--c-border);
+    margin-bottom: 20px;
+}
+
+.pf-tab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--c-text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.pf-tab:hover {
+    color: var(--c-accent);
+}
+
+.pf-tab.active {
+    color: var(--c-accent);
+    border-bottom-color: var(--c-accent);
+    font-weight: 700;
+}
+
+/* ── Card ── */
+.pf-card {
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.pf-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--c-border);
+}
+
+.pf-card-title {
+    font-family: 'Merriweather', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 3px;
+}
+
+.pf-card-sub {
+    font-size: 0.8rem;
+    color: var(--c-text-muted);
+}
+
+/* ── Buttons ── */
+.pf-btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+    border: 1.5px solid var(--c-accent);
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.pf-btn-edit:hover {
+    background: var(--c-accent);
+    color: #fff;
+}
+
+.pf-btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--c-accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.pf-btn-save:hover:not(:disabled) {
+    background: var(--c-accent-dim, #155aa0);
+}
+
+.pf-btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pf-btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: transparent;
+    color: var(--c-text-2);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.84rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.pf-btn-cancel:hover {
+    border-color: var(--c-danger);
+    color: var(--c-danger);
+}
+
+.pf-btn-change-pw {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 24px;
+    background: var(--c-accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pf-btn-change-pw:hover:not(:disabled) {
+    background: var(--c-accent-dim, #155aa0);
+}
+
+.pf-btn-change-pw:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Form grid ── */
+.pf-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.pf-pw-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.pf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pf-field-full {
+    grid-column: 1 / -1;
+}
+
+.pf-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--c-text-2);
+}
+
+.pf-label svg {
+    color: var(--c-accent);
+}
+
+.pf-input {
+    padding: 10px 12px;
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--c-text);
+    background: #fff;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.pf-input:focus {
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 3px rgba(26, 109, 196, 0.1);
+}
+
+.pf-input.error {
+    border-color: var(--c-danger);
+}
+
+.pf-input::placeholder {
+    color: var(--c-text-muted);
+}
+
+.pf-select {
+    cursor: pointer;
+}
+
+.pf-field-error {
+    font-size: 0.75rem;
+    color: var(--c-danger);
+    margin: 0;
+}
+
+/* ── View mode ── */
+.pf-view-val {
+    font-size: 0.9rem;
+    color: var(--c-text);
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--c-border);
+}
+
+.pf-empty-val {
+    color: var(--c-text-muted);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* Readonly field */
+.pf-readonly-val {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--c-text);
+    padding: 10px 12px;
+    background: var(--c-raised);
+    border: 1px dashed var(--c-border);
+    border-radius: var(--radius-sm);
+}
+
+.pf-readonly-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--c-raised);
+    color: var(--c-text-muted);
+    border: 1px solid var(--c-border);
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: auto;
+}
+
+/* ── Password fields ── */
+.pf-pw-wrap {
+    position: relative;
+}
+
+.pf-pw-wrap .pf-input {
+    padding-right: 44px;
+}
+
+.pf-pw-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--c-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    transition: color 0.15s;
+}
+
+.pf-pw-toggle:hover {
+    color: var(--c-accent);
+}
+
+/* ── Password strength ── */
+.pf-pw-strength {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.pf-pw-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 99px;
+    background: var(--c-border);
+    transition: background 0.3s;
+}
+
+.pf-pw-bar.weak {
+    background: var(--c-danger);
+}
+
+.pf-pw-bar.medium {
+    background: #f59e0b;
+}
+
+.pf-pw-bar.strong {
+    background: #10b981;
+}
+
+.pf-pw-bar.very-strong {
+    background: var(--c-accent);
+}
+
+.pf-pw-hint {
+    font-size: 0.72rem;
+    color: var(--c-text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.pf-pw-match {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+
+.pf-pw-match.ok {
+    color: #10b981;
+}
+
+.pf-pw-match.no {
+    color: var(--c-danger);
+}
+
+/* ── Skeleton ── */
+.pf-skeleton-wrap {
+    max-width: 400px;
+    margin: 60px auto;
+    text-align: center;
+}
+
+.pf-skeleton {
+    background: linear-gradient(90deg, #f0f4fa 25%, #e8eef6 50%, #f0f4fa 75%);
+    background-size: 200% 100%;
+    animation: pf-shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes pf-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ── Spinner ── */
+.pf-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(26, 109, 196, 0.25);
+    border-top-color: var(--c-accent);
+    border-radius: 50%;
+    animation: pf-spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+.pf-spinner-white {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+}
+
+@keyframes pf-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .pf-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pf-sidebar {
+        position: static;
+    }
+
+    .pf-form-grid,
+    .pf-pw-form {
+        grid-template-columns: 1fr;
+    }
+}
