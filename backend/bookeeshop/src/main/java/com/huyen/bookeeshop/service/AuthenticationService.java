@@ -182,7 +182,7 @@ public class AuthenticationService {
         // payload - Contains the data included in the token
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())  // Represents the authenticated user
-                .issuer("devteria.com")      // Usually the domain name – Used to identify who issued the token
+                .issuer("bookeeshop.com")      // Usually the domain name – Used to identify who issued the token
                 .issueTime(new Date())      // Token issue time
                 .expirationTime(new Date(
                         Instant.now()
