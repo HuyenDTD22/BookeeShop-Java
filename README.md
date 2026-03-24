@@ -172,9 +172,7 @@ Dự án áp dụng mô hình **Client – Server** với kiến trúc **Layered
 
 > 📎 _Sơ đồ ERD đầy đủ:_
 
-```
-![ERD](https://github.com/user-attachments/assets/a857cf7b-171c-48bb-94ca-a17f287d3e30)
-```
+![ERD](https://github.com/user-attachments/assets/93acaa0f-9f5f-424d-8639-e8ef71c4c6e2)
 
 ### Các bảng chính
 
