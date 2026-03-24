@@ -172,25 +172,31 @@ Dự án áp dụng mô hình **Client – Server** với kiến trúc **Layered
 
 > 📎 _Sơ đồ ERD đầy đủ (vẽ bằng Visual Paradigm):_
 
-<!-- TODO: Thêm ảnh ERD vào đây -->
 ```
-[ERD_IMAGE_PLACEHOLDER]
+<img width="1746" height="1408" alt="bookeeshop_jav" src="https://github.com/user-attachments/assets/2958d08b-b52b-4515-9869-2960d96bc626" />
 ```
 
 ### Các bảng chính
 
 | Bảng | Mô tả |
 |------|-------|
-| `users` | Thông tin tài khoản (khách hàng + nhân viên/admin) |
-| `roles` / `permissions` | Nhóm quyền và các quyền hạn cụ thể |
-| `books` | Thông tin sách |
-| `categories` | Danh mục sách (phân cấp cha – con) |
-| `orders` | Đơn hàng |
-| `order_items` | Chi tiết từng sản phẩm trong đơn hàng |
-| `reviews` | Đánh giá sao và bình luận của khách hàng |
-| `notifications` | Thông báo hệ thống và khuyến mãi |
-| `carts` / `cart_items` | Giỏ hàng |
-| `payments` | Thông tin giao dịch thanh toán |
+| `users` | Thông tin tài khoản dùng chung cho khách hàng, nhân viên và admin |
+| `roles` | Nhóm quyền (USER, ADMIN, STAFF_MANAGER, STAFF_SUPPORT...) |
+| `permissions` | Các quyền hạn cụ thể trong hệ thống (BOOK_CREATE, ORDER_VIEW...) |
+| `user_roles` | Liên kết người dùng với nhóm quyền (many-to-many) |
+| `role_permissions` | Liên kết nhóm quyền với các quyền hạn (many-to-many) |
+| `categories` | Danh mục sách, hỗ trợ phân cấp cha – con |
+| `books` | Thông tin sách (giá, tác giả, NXB, tồn kho, ảnh bìa...) |
+| `carts` | Giỏ hàng, mỗi khách hàng có một giỏ duy nhất |
+| `cart_items` | Chi tiết từng sách trong giỏ hàng |
+| `orders` | Đơn hàng, bao gồm thông tin thanh toán (COD / VNPay) và trạng thái |
+| `order_items` | Chi tiết từng sách trong đơn hàng (lưu giá tại thời điểm mua) |
+| `ratings` | Đánh giá sao của khách hàng cho từng đầu sách |
+| `comments` | Bình luận của khách hàng, hỗ trợ trả lời dạng thread (parent – child) |
+| `notifications` | Thông báo hệ thống, đơn hàng và khuyến mãi (có lên lịch gửi, bản nháp) |
+| `user_notifications` | Theo dõi trạng thái đã đọc / chưa đọc thông báo của từng người dùng |
+| `forgot_passwords` | Lưu OTP xác thực cho chức năng quên mật khẩu |
+| `invalidated_token` | Danh sách JWT token đã bị thu hồi (đăng xuất) |
 
 ---
 
