@@ -170,10 +170,10 @@ Dự án áp dụng mô hình **Client – Server** với kiến trúc **Layered
 
 ### Sơ đồ ERD
 
-> 📎 _Sơ đồ ERD đầy đủ (vẽ bằng Visual Paradigm):_
+> 📎 _Sơ đồ ERD đầy đủ:_
 
 ```
-![ERD](https://github.com/HuyenDTD22/BookeeShop-Java/issues/1#issue-4129841880)
+![ERD](https://github.com/user-attachments/assets/a857cf7b-171c-48bb-94ca-a17f287d3e30)
 ```
 
 ### Các bảng chính
