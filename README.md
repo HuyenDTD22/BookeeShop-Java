@@ -1,12 +1,5 @@
 # 📚 BookeeShop — E-commerce Book Store Website
 
-![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.10-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![React](https://img.shields.io/badge/React-19.2.4-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-Deploy-000000?style=for-the-badge&logo=vercel&logoColor=white)
-
 > **BookeeShop** là một ứng dụng web thương mại điện tử bán sách trực tuyến, bao gồm hai phân hệ chính: giao diện mua sắm dành cho khách hàng và hệ thống quản trị dành cho admin/nhân viên.
 
 🌐 **Live Demo:** [https://bookeeshop.vercel.app/](https://bookeeshop.vercel.app/)
@@ -147,28 +140,28 @@ Dự án áp dụng mô hình **Client – Server** với kiến trúc **Layered
 
 ```
 ┌─────────────────────────────────────────────┐
-│              Frontend (ReactJS)              │
-│          Vercel — bookeeshop.vercel.app      │
+│              Frontend (ReactJS)             │
+│          Vercel — bookeeshop.vercel.app     │
 └──────────────────┬──────────────────────────┘
                    │ HTTP/REST API (JSON)
 ┌──────────────────▼──────────────────────────┐
-│            Backend (Spring Boot)             │
+│            Backend (Spring Boot)            │
 │               Render                        │
-│  ┌──────────┐  ┌──────────┐  ┌───────────┐ │
-│  │Controller│→ │ Service  │→ │Repository │ │
-│  └──────────┘  └──────────┘  └─────┬─────┘ │
-└─────────────────────────────────────┼───────┘
-                                      │ JPA
-┌─────────────────────────────────────▼───────┐
-│           Database (PostgreSQL)              │
+│  ┌──────────┐  ┌──────────┐  ┌───────────┐  │
+│  │Controller│→ │ Service  │→ │Repository │  │
+│  └──────────┘  └──────────┘  └─────┬─────┘  │
+└────────────────────────────────────┼────────┘
+                                     │ JPA
+┌────────────────────────────────────▼────────┐
+│           Database (PostgreSQL)             │
 │                 Supabase                    │
 └─────────────────────────────────────────────┘
-         │                    │
-    ┌────▼────┐          ┌────▼────┐
-    │Cloudinary│          │ VNPay  │
-    │  (ảnh)  │          │(thanh  │
-    └─────────┘          │ toán)  │
-                         └────────┘
+         │                     │
+    ┌────▼─────┐          ┌────▼────┐
+    │Cloudinary│          │ VNPay   │
+    │  (ảnh)   │          │(thanh   │
+    └──────────┘          │ toán)   │
+                          └─────────┘
 ```
 
 ---
@@ -213,62 +206,25 @@ Dự án áp dụng mô hình **Client – Server** với kiến trúc **Layered
 - Maven 3.8+
 
 ### 1. Clone dự án
-
 ```bash
-git clone https://github.com/<your-username>/bookeeshop.git
-cd bookeeshop
+git clone <repo-url>
 ```
 
 ### 2. Cấu hình Backend
-
-Tạo file `src/main/resources/application-prod.yml` (hoặc chỉnh sửa `application.yml`) với các thông tin sau:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://<DB_HOST>:<DB_PORT>/<DB_NAME>
-    username: <DB_USERNAME>
-    password: <DB_PASSWORD>
-
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: <EMAIL>
-    password: <EMAIL_APP_PASSWORD>
-
-jwt:
-  secret-key: <YOUR_JWT_SECRET>
-  expiration: 86400000
-
-cloudinary:
-  cloud-name: <CLOUDINARY_CLOUD_NAME>
-  api-key: <CLOUDINARY_API_KEY>
-  api-secret: <CLOUDINARY_API_SECRET>
-
-vnpay:
-  tmn-code: <VNPAY_TMN_CODE>
-  hash-secret: <VNPAY_HASH_SECRET>
-  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  return-url: <YOUR_RETURN_URL>
-```
-
-Chạy backend:
-
 ```bash
-cd backend
+cd bookeeshop
 mvn clean install
 mvn spring-boot:run
 ```
-
 Backend sẽ chạy tại: `http://localhost:8080`
 
 ### 3. Cấu hình Frontend
-
 Tạo file `.env` trong thư mục `frontend`:
 
 ```env
-REACT_APP_API_URL=http://localhost:8080/api
-REACT_APP_VNPAY_RETURN_URL=http://localhost:3000/payment/result
+REACT_APP_API_URL=http://localhost:8080/bookeeshop
+REACT_APP_API_PREFIX_ADMIN=admin
+REACT_APP_ADMIN_ROUTE=admin
 ```
 
 Chạy frontend:
@@ -294,14 +250,20 @@ backend/
 ├── src/
 │   └── main/
 │       ├── java/com/huyen/bookeeshop/
-│       │   ├── config/          # Cấu hình Spring Security, CORS, JWT...
+│       │   ├── configuration/   # Cấu hình Spring Security, CORS, JWT...
+|       |   ├── constant/        # Các hằng số toàn cục
 │       │   ├── controller/      # REST API Controllers
-│       │   ├── service/         # Business logic
-│       │   ├── repository/      # JPA Repositories
-│       │   ├── entity/          # JPA Entities (ánh xạ bảng DB)
 │       │   ├── dto/             # Data Transfer Objects
-│       │   ├── mapper/          # MapStruct Mappers
-│       │   └── exception/       # Xử lý ngoại lệ toàn cục
+│       │   ├── entity/          # JPA Entities (ánh xạ bảng DB)
+│       │   ├── enums/           # Các enum dùng trong project
+│       │   ├── exception/       # Xử lý ngoại lệ toàn cục
+|       |   ├── mapper/          # MapStruct Mappers
+|       |   ├── repository/      # JPA Repositories
+|       |   ├── scheduler/       # Các task scheduler định kỳ
+|       |   ├── service/         # Business logic
+|       |   ├── specification/   # JPA Specifications
+│       │   ├── util/            # Các hàm tiện ích chung
+│       │   └── validator/       # Custom validators
 │       └── resources/
 │           ├── application.yml
 │           └── application-prod.yml
@@ -314,16 +276,15 @@ backend/
 frontend/
 ├── public/
 ├── src/
-│   ├── assets/          # Hình ảnh, icon tĩnh
 │   ├── components/      # Các component dùng chung
-│   ├── pages/           # Các trang (Client & Admin)
-│   │   ├── client/      # Giao diện khách hàng
-│   │   └── admin/       # Giao diện quản trị
-│   ├── services/        # Gọi API (Axios)
-│   ├── hooks/           # Custom React Hooks
+|   ├── constants/       # Chứa các hằng số toàn cục
 │   ├── context/         # React Context (Auth, Cart...)
+│   ├── pages/           # Các trang (Client & Admin)
+│   ├── routes/          # Cấu hình route
+│   ├── services/        # Gọi API (Axios)
+|   ├── styles/          # File CSS
 │   ├── utils/           # Hàm tiện ích
-│   └── App.js
+│   └── App.js           # Entry point React app
 ├── .env
 └── package.json
 ```
@@ -361,7 +322,7 @@ http://localhost:8080/swagger-ui/index.html
 ### Luồng sử dụng chính
 
 **Khách hàng:**
-1. Truy cập trang chủ → Duyệt / tìm kiếm sách
+1. Truy cập trang chủ → Tìm kiếm sách
 2. Đăng ký / Đăng nhập tài khoản
 3. Thêm sách vào giỏ hàng → Tiến hành đặt hàng
 4. Chọn phương thức thanh toán: **COD** hoặc **VNPay**
@@ -370,9 +331,9 @@ http://localhost:8080/swagger-ui/index.html
 
 **Admin/Nhân viên:**
 1. Đăng nhập vào hệ thống quản trị
-2. Quản lý sách, danh mục, đơn hàng theo phân quyền được cấp
+2. Quản lý sách, danh mục, đơn hàng, thông báo, khách hàng theo phân quyền được cấp
 3. Gửi thông báo đến khách hàng (có thể đặt lịch)
-4. Xem và phản hồi bình luận của khách hàng
+4. Xem thống kê doanh thu, sô lượng đơn hàng, khách hàng, sách,...
 
 ---
 
@@ -397,15 +358,12 @@ http://localhost:8080/swagger-ui/index.html
 
 ## ☁️ Deploy
 
-| Thành phần | Platform | Ghi chú |
-|-----------|----------|---------|
-| Frontend | [Vercel](https://vercel.com/) | Auto deploy từ GitHub |
-| Backend | [Render](https://render.com/) | Spring Boot JAR |
-| Database | [Supabase](https://supabase.com/) | PostgreSQL hosted |
-| Image Storage | [Cloudinary](https://cloudinary.com/) | Upload & CDN ảnh |
+| Thành phần | Platform |
+|-----------|----------|
+| Frontend | [Vercel](https://vercel.com/) |
+| Backend | [Render](https://render.com/) | 
+| Database | [Supabase](https://supabase.com/) |
+| Image Storage | [Cloudinary](https://cloudinary.com/) |
 
 ---
 
-<p align="center">
-  Được xây dựng với ❤️ bằng Spring Boot & ReactJS
-</p>
