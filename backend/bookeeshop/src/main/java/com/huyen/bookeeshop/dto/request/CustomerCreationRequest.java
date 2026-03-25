@@ -1,10 +1,7 @@
 package com.huyen.bookeeshop.dto.request;
 
 import com.huyen.bookeeshop.validator.DobConstraint;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,6 +14,7 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomerCreationRequest {
     @NotBlank(message = "USERNAME_REQUIRED")
+    @Email(message = "USERNAME_INVALID")
     @Size(min = 3, max = 50, message = "USERNAME_INVALID")
     String username;
 

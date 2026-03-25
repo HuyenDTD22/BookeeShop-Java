@@ -1,10 +1,7 @@
 package com.huyen.bookeeshop.dto.request;
 
 import com.huyen.bookeeshop.validator.DobConstraint;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -19,6 +16,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffCreationRequest {
     @NotBlank
+    @Email(message = "USERNAME_INVALID")
     @Size(min = 3, max = 50, message = "USERNAME_INVALID")
     String username;
 
