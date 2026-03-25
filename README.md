@@ -337,72 +337,89 @@ http://localhost:8080/swagger-ui/index.html
 
 ## 🖼 Screenshots
 
-> 📸 _Giao diện ứng dụng:_
-
-###1. Giao diện phía khách hàng
+### 1. Giao diện phía khách hàng
 
 **Giao diện đăng ký**
+
 ![SCREENSHOT_SIGNUP](https://github.com/user-attachments/assets/17c45242-9f2c-4667-86f8-cd848b26e827)
 
 **Giao diện đăng nhập**
+
 ![SCREENSHOT_LOGIN](https://github.com/user-attachments/assets/a00e5d98-e120-4506-8ecd-a3d9d01a9cdc)
 
 **Giao diện quên mật khẩu**
+
 ![SCREENSHOT_FORGOTPASSWORD](https://github.com/user-attachments/assets/09a81d3d-80cc-47ec-92cc-05963fb4426a)
 
 **Giao diện tramg chủ**
+
 ![SCREENSHOT_HOMEPAGE_1](https://github.com/user-attachments/assets/4ab41fce-44bd-492c-a4e9-27a449c2bafa)
 ![SCREENSHOT_HOMEPAGE_2](https://github.com/user-attachments/assets/505ded87-5411-4534-b569-b2477b6fa661)
 ![SCREENSHOT_HOMEPAGE_3](https://github.com/user-attachments/assets/b744bf07-ef99-465e-a099-c5712e7dfd90)
 
 **Giao diện chi tiết sách**
+
 ![SCREENSHOT_BOOKDETAIL_1](https://github.com/user-attachments/assets/29efc37a-761f-4a32-aabd-2bf2c6e06127)
 ![SCREENSHOT_BOOKDETAIL_2](https://github.com/user-attachments/assets/043182d2-6592-42e1-bc6d-2b54335e4cfa)
 
 **Giao diện giỏ hàng**
+
 ![SCREENSHOT_CART](https://github.com/user-attachments/assets/74709f41-f708-458b-802b-25295eea4992)
 
 **Giao diện thanh toán**
+
 ![SCREENSHOT_CHECKOUT_1](https://github.com/user-attachments/assets/e2ce1ef3-e281-4cf8-9e39-0e9d8b7846cf)
 ![SCREENSHOT_CHECKOUT_2](https://github.com/user-attachments/assets/03e7a45c-85d1-4581-9f85-c0369c0cf8a1)
 
 **Giao diện theo dõi đơn hàng**
+
 ![SCREENSHOT_ORDER](https://github.com/user-attachments/assets/b720d22d-7286-438f-abba-036a7f75aaf1)
 
 **Giao diện thông báo**
+
 ![SCREENSHOT_NOTIFICATION](https://github.com/user-attachments/assets/83e4708b-98a0-49a7-81e1-867e444071d5)
 
-###2. Giao diện phía Admin/Nhân viên
+### 2. Giao diện phía Admin/Nhân viên
 
 **Giao diện đăng nhập**
+
 ![SCREENSHOT_LOGIN_ADMIN](https://github.com/user-attachments/assets/ebf36850-e484-4838-9cb9-3839e1a6dcde)
 
 **Giao diện Dashboard**
+
 ![SCREENSHOT_ADMIN_DASHBOARD_1](https://github.com/user-attachments/assets/d48399e8-e580-4254-89fc-1a55dd985313)
 ![SCREENSHOT_ADMIN_DASHBOARD_2](https://github.com/user-attachments/assets/54d0a177-2c31-49e9-81a4-a07da10e28f9)
 
 **Giao diện quản lý sách**
+
 ![SCREENSHOT_BOOK_MANAGER](https://github.com/user-attachments/assets/10309f67-0b08-4c72-9c24-219e839e6cd9)
 
 **Giao diện quản lý danh mục**
+
 ![SCREENSHOT_CATEGORY_MANAGER](https://github.com/user-attachments/assets/199d87bc-956b-4586-96a2-633fb63f72d5)
 
 **Giao diện quản lý khách hàng**
+
 ![SCREENSHOT_CUSTOMER_MANAGER](https://github.com/user-attachments/assets/f5cfa550-9d8d-4f4d-8107-92cc55123182)
 
 **Giao diện quản lý đơn hàng**
+
 ![SCREENSHOT_ORDER_MANAGER](https://github.com/user-attachments/assets/f1228bda-073a-4352-b876-470ec946550b)
 
 **Giao diện quản lý thông báo**
+
 ![SCREENSHOT_NOTIFICATION_MANAGER](https://github.com/user-attachments/assets/4bcbc6df-d714-4dcc-ae07-b9127db2555d)
 
 **Giao diện quản lý nhân viên**
+
 ![SCREENSHOT_STAFF_MANAGER](https://github.com/user-attachments/assets/3a4db1c3-6b24-4015-83a0-18669a796174)
 
 **Giao diện quản lý nhóm quyền**
+
 ![SCREENSHOT_ROLE_MANAGER](https://github.com/user-attachments/assets/1259eb9d-d4f4-4c5f-8dc0-416ee9cff048)
 
 **Giao diện phân quyền**
+
 ![SCREENSHOT_PERMISSION_MANAGER](https://github.com/user-attachments/assets/dc07c4e0-7f60-42a4-9ce0-3d7e18fac56b)
 
 ---
