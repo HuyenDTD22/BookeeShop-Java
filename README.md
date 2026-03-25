@@ -351,7 +351,7 @@ http://localhost:8080/swagger-ui/index.html
 
 ![SCREENSHOT_FORGOTPASSWORD](https://github.com/user-attachments/assets/09a81d3d-80cc-47ec-92cc-05963fb4426a)
 
-**Giao diện tramg chủ**
+**Giao diện trang chủ**
 
 ![SCREENSHOT_HOMEPAGE_1](https://github.com/user-attachments/assets/4ab41fce-44bd-492c-a4e9-27a449c2bafa)
 ![SCREENSHOT_HOMEPAGE_2](https://github.com/user-attachments/assets/505ded87-5411-4534-b569-b2477b6fa661)
