@@ -97,7 +97,7 @@ const LoginPageAdmin = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-group-admin">
-            <label className="form-label-admin">Tên đăng nhập</label>
+            <label className="form-label-admin">Email</label>
             <div className="input-wrap">
               <span className="login-input-icon">
                 <FiUser size={15} />
@@ -107,7 +107,7 @@ const LoginPageAdmin = () => {
                 type="text"
                 value={form.username}
                 onChange={handleChange}
-                placeholder="Nhập tên đăng nhập"
+                placeholder="ten@email.com"
                 autoComplete="username"
                 autoFocus
                 className="form-control-admin input-with-left-icon"
@@ -158,12 +158,6 @@ const LoginPageAdmin = () => {
             )}
           </button>
         </form>
-
-        <p className="login-footer-note">
-          Chỉ dành cho nhân viên và quản trị viên.
-          <br />
-          Liên hệ admin nếu bạn quên mật khẩu.
-        </p>
       </div>
     </div>
   );
